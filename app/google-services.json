@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "663032779545",
+    "project_id": "iquadras-c1085",
+    "storage_bucket": "iquadras-c1085.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:663032779545:android:00f29d5d5cbc208bd46b88",
+        "android_client_info": {
+          "package_name": "com.example.iquadras"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAfyAHuG8rrAbd4Ka4GfOzlSgUhhfE_9bc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
