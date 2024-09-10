@@ -1,0 +1,4 @@
+# Exemplo de arquivo local.properties
+# Cada desenvolvedor deve configurar este arquivo localmente com o caminho correto do SDK do Android
+
+# sdk.dir=C:\\Caminho\\para\\seu\\Android\\Sdk
