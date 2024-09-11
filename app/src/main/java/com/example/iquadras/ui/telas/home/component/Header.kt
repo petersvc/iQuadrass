@@ -30,11 +30,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.iquadras.R
 import com.example.iquadras.model.user.User
-import com.example.iquadras.ui.telas.home.component.UserProfileDialog
+
+
 
 @Composable
-fun Header(onLogoffClick: () -> Unit, modifier: Modifier = Modifier, user: User) {
-    var showDialog by remember { mutableStateOf(false) }
+fun Header(
+    onLogoffClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    user: User, // Recebendo o usuário logado
+
+) {
+    var showDialog by remember { mutableStateOf(false) } // Controla se o modal de perfil deve ser exibido
 
     Row(
         modifier = modifier
@@ -60,6 +66,8 @@ fun Header(onLogoffClick: () -> Unit, modifier: Modifier = Modifier, user: User)
                 )
             }
         }
+
+        // Imagem do usuário que abre o modal ao clicar
         Column {
             Box(
                 modifier = Modifier
@@ -70,8 +78,8 @@ fun Header(onLogoffClick: () -> Unit, modifier: Modifier = Modifier, user: User)
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.profile2),
-                    contentDescription = "Descrição do ícone",
+                    painter = painterResource(id = R.drawable.profile2), // Altere para o avatar correto
+                    contentDescription = "Foto de perfil",
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer(alpha = 0.99f),
@@ -81,9 +89,17 @@ fun Header(onLogoffClick: () -> Unit, modifier: Modifier = Modifier, user: User)
         }
     }
 
+    // Modal de Perfil do Usuário
     if (showDialog) {
         UserProfileDialog(
-            onDismiss = { showDialog = false }
+            userDTO = user, // Passando o objeto User para o modal
+            onDismiss = { showDialog = false },
+            onDeleteClick = {
+                showDialog = false
+            },
+            onLogoffClick
+
         )
     }
 }
+

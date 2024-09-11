@@ -1,40 +1,24 @@
 package com.example.iquadras.ui.telas.home.component
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.*
+
 import com.example.iquadras.model.user.User
 
 @Composable
-fun EditUserDialog(
+fun UserEditProfileDialog(
     user: User,
     onDismiss: () -> Unit,
     onSaveClick: (User) -> Unit
 ) {
-    var name by remember { mutableStateOf(user.name) }
-    var email by remember { mutableStateOf(user.email) }
-    var phoneNumber by remember { mutableStateOf(user.phoneNumber) }
+    var updatedName by remember { mutableStateOf(user.name) }
+    var updatedEmail by remember { mutableStateOf(user.email) }
+    var updatedPhone by remember { mutableStateOf(user.phoneNumber) }
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
@@ -44,18 +28,18 @@ fun EditUserDialog(
         text = {
             Column {
                 TextField(
-                    value = name,
-                    onValueChange = { name = it },
+                    value = updatedName,
+                    onValueChange = { updatedName = it },
                     label = { Text("Nome") }
                 )
                 TextField(
-                    value = email,
-                    onValueChange = { email = it },
+                    value = updatedEmail,
+                    onValueChange = { updatedEmail = it },
                     label = { Text("Email") }
                 )
                 TextField(
-                    value = phoneNumber,
-                    onValueChange = { phoneNumber = it },
+                    value = updatedPhone,
+                    onValueChange = { updatedPhone = it },
                     label = { Text("Telefone") }
                 )
             }
@@ -63,8 +47,12 @@ fun EditUserDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val updatedUser = user.copy(name = name, email = email, phoneNumber = phoneNumber)
-                    onSaveClick(updatedUser) // Atualiza o usuário com os novos dados
+                    val updatedUser = user.copy(
+                        name = updatedName,
+                        email = updatedEmail,
+                        phoneNumber = updatedPhone
+                    )
+                    onSaveClick(updatedUser) // Chama a função de salvar
                 }
             ) {
                 Text("Salvar")
