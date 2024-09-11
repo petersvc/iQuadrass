@@ -1,6 +1,7 @@
 package com.example.iquadras.model.user
 
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.toObject
 import com.google.firebase.firestore.toObjects
 
@@ -8,6 +9,7 @@ class UserDAO {
 
     private val db = FirebaseFirestore.getInstance()
     private val collection = db.collection("user")
+
 
     fun getAll(callback: (List<User>) -> Unit) {
         collection.get()
@@ -19,6 +21,7 @@ class UserDAO {
                 callback(emptyList())
             }
     }
+
 
     fun findByEmail(email: String, callback: (User?) -> Unit) {
         collection.whereEqualTo("email", email).get()
@@ -35,6 +38,7 @@ class UserDAO {
             }
     }
 
+
     fun findByName(name: String, callback: (User?) -> Unit) {
         collection.whereEqualTo("name", name).get()
             .addOnSuccessListener { document ->
@@ -49,6 +53,7 @@ class UserDAO {
                 callback(null)
             }
     }
+
 
     fun findById(id: String, callback: (User) -> Unit) {
         collection.document(id).get()
@@ -72,6 +77,27 @@ class UserDAO {
             }
             .addOnFailureListener {
                 callback(User())
+            }
+    }
+
+
+    fun update(user: User, callback: (Boolean) -> Unit) {
+        collection.document(user.id).set(user, SetOptions.merge())
+            .addOnSuccessListener {
+                callback(true)
+            }
+            .addOnFailureListener {
+                callback(false)
+            }
+    }
+
+    fun delete(user: User, callback: (Boolean) -> Unit){
+        collection.document(user.id).delete()
+            .addOnSuccessListener {
+                callback(true)
+            }
+            .addOnFailureListener {
+                callback(false)
             }
     }
 
