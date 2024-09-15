@@ -10,6 +10,7 @@ espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.4"
 activityCompose = "1.9.1"
 composeBom = "2024.04.01"
+materialIconsExtended = "<version>"
 navigationRuntimeKtx = "2.7.7"
 navigationCompose = "2.7.7"
 retrofit = "2.9.0"
@@ -18,6 +19,7 @@ kotlinxCoroutinesCore = "1.5.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-common-ktx = { module = "com.google.firebase:firebase-common-ktx" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore" }

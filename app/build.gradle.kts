@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.gson)
+    implementation(libs.androidx.material.icons.extended)
 
     implementation("androidx.compose.material:material:1.4.0")
     implementation("androidx.compose.ui:ui:1.4.0")
@@ -83,7 +84,6 @@ dependencies {
     // Atulizando as dependências do Compose
     implementation("androidx.compose.material:material:1.5.1")
     implementation("androidx.compose.ui:ui:1.5.1")
-    implementation("androidx.compose.material:material-icons-extended:1.5.1")
     implementation("androidx.compose.ui:ui-tooling-preview:1.5.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
 
