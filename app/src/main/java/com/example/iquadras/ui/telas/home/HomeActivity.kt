@@ -21,8 +21,13 @@ import com.example.iquadras.ui.telas.home.component.NearbyCourts
 import com.example.iquadras.ui.telas.home.component.PopularCourts
 import com.example.iquadras.ui.telas.home.component.SubHeader
 
+
+
 @Composable
-fun HomeActivity(modifier: Modifier = Modifier, onLogoffClick: () -> Unit, user: User) {
+fun HomeActivity(modifier: Modifier = Modifier,
+                 onLogoffClick: () -> Unit,
+                 onCourtClick: (Court) -> Unit,
+                 user: User) {
     val scope = rememberCoroutineScope()
     val courts = remember { mutableStateListOf<Court>() }
 
@@ -45,9 +50,17 @@ fun HomeActivity(modifier: Modifier = Modifier, onLogoffClick: () -> Unit, user:
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        PopularCourts()
+        PopularCourts(
+            onCourtClick = { courtId ->
+                onCourtClick(courtId)}
+        )
 
-        NearbyCourts(modifier, courts)
+        NearbyCourts(
+            modifier,
+            courts,
+            onCourtClick = { court ->
+                onCourtClick(court)}
+        )
 
     }
 }

@@ -1,6 +1,7 @@
 package com.example.iquadras.ui.telas.home.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,7 +38,9 @@ import com.example.iquadras.R
 import com.example.iquadras.model.court.Court
 
 @Composable
-fun NearbyCourts(modifier: Modifier = Modifier, courts: List<Court>) {
+fun NearbyCourts(modifier: Modifier = Modifier,
+                 courts: List<Court>,
+                 onCourtClick: (Court) -> Unit ){
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
@@ -79,6 +82,9 @@ fun NearbyCourts(modifier: Modifier = Modifier, courts: List<Court>) {
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .clip(RoundedCornerShape(12.dp))
+                            .clickable {
+                                onCourtClick(court)
+                            }
                     ) {
                         Column(
                             verticalArrangement = Arrangement.SpaceBetween,
