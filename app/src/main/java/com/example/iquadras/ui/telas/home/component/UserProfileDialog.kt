@@ -80,7 +80,7 @@ fun UserProfileDialog(
                 Column {
                     Text("Nome: ${user?.name}")
                     Text("Email: ${user?.email}")
-                    Text("Telefone: ${user?.phoneNumber}")
+                    Text("Telefone: ${user?.phone}")
                 }
             },
             confirmButton = {

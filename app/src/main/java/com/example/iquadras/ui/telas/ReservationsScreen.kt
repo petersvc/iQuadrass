@@ -57,7 +57,7 @@ fun ReservedCourtItem(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(text = "Quadra: ${court.name}", fontWeight = FontWeight.Bold)
-            Text(text = "Localização: ${court.adress}")
+            Text(text = "Localização: ${court.latitude}, ${court.longitude}")
             Text(text = "Preço: R$ ${court.price}")
             //Text(text = "Esportes: ${court.sports.joinToString(", ")}")
         }

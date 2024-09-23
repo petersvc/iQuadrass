@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.iquadras.model.user.DTOUser
 import com.example.iquadras.model.user.User
 import com.example.iquadras.ui.telas.TelaCadastro
 import com.example.iquadras.ui.telas.TelaLogin
@@ -34,7 +35,7 @@ class MainActivity : ComponentActivity() {
                         composable("login") {
                             TelaLogin(
                                 modifier = Modifier.padding(innerPadding),
-                                onSignInClick = { user: User ->
+                                onSignInClick = { user: DTOUser ->
                                     val userJson = Gson().toJson(user)
                                     navController.navigate("main/$userJson")
                                 },
@@ -73,3 +74,5 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+

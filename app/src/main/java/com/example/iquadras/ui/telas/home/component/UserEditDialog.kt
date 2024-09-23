@@ -18,7 +18,7 @@ fun UserEditProfileDialog(
 ) {
     var updatedName by remember { mutableStateOf(user.name) }
     var updatedEmail by remember { mutableStateOf(user.email) }
-    var updatedPhone by remember { mutableStateOf(user.phoneNumber) }
+    var updatedPhone by remember { mutableStateOf(user.phone) }
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
@@ -50,7 +50,7 @@ fun UserEditProfileDialog(
                     val updatedUser = user.copy(
                         name = updatedName,
                         email = updatedEmail,
-                        phoneNumber = updatedPhone
+                        phone = updatedPhone
                     )
                     onSaveClick(updatedUser) // Chama a função de salvar
                 }

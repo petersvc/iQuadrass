@@ -75,17 +75,21 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.gson)
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.play.services.location)
+    implementation(libs.accompanist.permissions.v0320)  // Atualize para a versão mais recente
+    implementation(libs.coil.compose) // Verifique se há uma versão mais recente
 
-    implementation("androidx.compose.material:material:1.4.0")
-    implementation("androidx.compose.ui:ui:1.4.0")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.4.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+
+    implementation(libs.androidx.material)
+    implementation(libs.ui)
+    implementation(libs.ui.tooling.preview)
+    implementation(libs.androidx.lifecycle.runtime.ktx.v251)
 
     // Atulizando as dependências do Compose
-    implementation("androidx.compose.material:material:1.5.1")
-    implementation("androidx.compose.ui:ui:1.5.1")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.5.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.5.1")
+    implementation(libs.androidx.material.v151)
+    implementation(libs.androidx.ui.v151)
+    implementation(libs.androidx.ui.tooling.preview.v151)
+    implementation(libs.androidx.lifecycle.runtime.ktx.v285)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

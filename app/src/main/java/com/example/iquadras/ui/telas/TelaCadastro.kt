@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.example.iquadras.R
 import com.example.iquadras.model.adress.Adress
 import com.example.iquadras.model.restClient.RetrofitClient
+import com.example.iquadras.model.user.DTOUser
 import com.example.iquadras.model.user.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -55,10 +56,9 @@ fun TelaCadastro(modifier: Modifier = Modifier, onSignUpClick: () -> Unit, onSig
     val context = LocalContext.current
     var scope = rememberCoroutineScope()
     var name by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
+    var phone by remember { mutableStateOf("") }
     var login by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var cep by remember { mutableStateOf("") }
     var mensagemErro by remember { mutableStateOf<String?>(null) }
 
     Column(
@@ -112,36 +112,11 @@ fun TelaCadastro(modifier: Modifier = Modifier, onSignUpClick: () -> Unit, onSig
         Spacer(modifier = Modifier.height(30.dp))
 
         TextField(
-            value = phoneNumber,
-            onValueChange = { phoneNumber = it },
+            value = phone,
+            onValueChange = { phone = it },
             placeholder = {
                 Text(
                     text = "Telefone",
-                    style = TextStyle(fontWeight = FontWeight.Medium, color = Color.Gray.copy(alpha = 0.8f))
-                )
-            },
-            textStyle = TextStyle(
-                fontWeight = FontWeight.Bold
-            ),
-            colors = TextFieldDefaults.textFieldColors(
-                containerColor = Color.Gray.copy(alpha = 0.1f),
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-        )
-
-        Spacer(modifier = Modifier.height(30.dp))
-
-        TextField(
-            value = cep,
-            onValueChange = { cep = it },
-            placeholder = {
-                Text(
-                    text = "CEP",
                     style = TextStyle(fontWeight = FontWeight.Medium, color = Color.Gray.copy(alpha = 0.8f))
                 )
             },
@@ -228,17 +203,26 @@ fun TelaCadastro(modifier: Modifier = Modifier, onSignUpClick: () -> Unit, onSig
         Button(
             onClick = {
                 scope.launch(Dispatchers.IO) {
-                    val adress = getAdress(cep)
-                    userDAO.findByEmail(login, callback = { user ->
-                        if (user != null) {
-                            mensagemErro = "Usuário já cadastrado!"
-                        } else {
-                            val userToSave = User(name= name, phoneNumber = phoneNumber, email = login, password = password, adress = adress)
-                            userDAO.save(userToSave, callback = {
-                                onSignUpClick()
-                            })
+                    val userToSave = User(name= name, phone = phone, email = login, password = password)
+                    val user = createUser(userToSave)
+                    if (user.id.isEmpty()) {
+                        mensagemErro = "Não foi possível cadastrar o usuário!"
+                        return@launch
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            onSignUpClick()
                         }
-                    })
+                    }
+//                    userDAO.findByEmail(login, callback = { user ->
+//                        if (user != null) {
+//                            mensagemErro = "Usuário já cadastrado!"
+//                        } else {
+//                            val userToSave = User(name= name, phone = phone, email = login, password = password)
+//                            userDAO.save(userToSave, callback = {
+//                                onSignUpClick()
+//                            })
+//                        }
+//                    })
                 }
             },
             modifier = Modifier
@@ -284,8 +268,8 @@ fun TelaCadastro(modifier: Modifier = Modifier, onSignUpClick: () -> Unit, onSig
     }
 }
 
-suspend fun getAdress(cep: String): Adress {
+suspend fun createUser(user: User): DTOUser {
     return withContext(Dispatchers.IO) {
-        RetrofitClient.adressService.getAdress(cep)
+        RetrofitClient.userService.createUser(user)
     }
 }

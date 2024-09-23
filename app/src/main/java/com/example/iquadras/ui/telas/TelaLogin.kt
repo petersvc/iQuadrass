@@ -52,10 +52,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.iquadras.R
 import com.example.iquadras.model.court.CourtDAO
+import com.example.iquadras.model.restClient.RetrofitClient
+import com.example.iquadras.model.user.DTOUser
+import com.example.iquadras.model.user.DTOUserLogin
 import com.example.iquadras.model.user.User
 import com.example.iquadras.model.user.UserDAO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 val userDAO: UserDAO = UserDAO()
 val courtDAO: CourtDAO = CourtDAO()
@@ -63,7 +67,7 @@ val themeColor = Color(0xFF6C56F2)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (User) -> Unit, onSignUpClick: () -> Unit) {
+fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (DTOUser) -> Unit, onSignUpClick: () -> Unit) {
 
     val context = LocalContext.current
     var scope = rememberCoroutineScope()
@@ -84,7 +88,6 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (User) -> Unit, onSi
                     fontSize = 24.sp
                 ),
                 modifier = Modifier.padding(top = 16.dp)
-
             )
         }
         Row {
@@ -93,6 +96,7 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (User) -> Unit, onSi
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxWidth()
             ) {
+
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Box(
@@ -104,33 +108,33 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (User) -> Unit, onSi
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.tennis),
+                        painter = painterResource(id = R.drawable.loginimg),
                         contentDescription = "Descrição do ícone",
-                        modifier = Modifier.size(180.dp)
-                            .graphicsLayer(alpha = 0.99f) // Ajusta a opacidade da imagem
+                        modifier = Modifier.size(220.dp)
+                            .graphicsLayer(alpha = 0.5f) // Ajusta a opacidade da imagem
                     )
                 }
-                Spacer(modifier = Modifier.height(0.dp))
-                Text(
-                    text = "Encontre sua quadra",
-                    style = TextStyle(
-                        fontWeight = FontWeight.Light,
-                        fontSize = 22.sp,
-                    ),
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Nós te ajudamos a encontrar a quadra perfeita para você.",
-                    style = TextStyle(
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        color = Color.Gray.copy(alpha = 0.8f)
-                    ),
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .width(270.dp)
-                )
+//                Spacer(modifier = Modifier.height(0.dp))
+//                Text(
+//                    text = "Encontre sua quadra",
+//                    style = TextStyle(
+//                        fontWeight = FontWeight.Light,
+//                        fontSize = 22.sp,
+//                    ),
+//                )
+//                Spacer(modifier = Modifier.height(12.dp))
+//                Text(
+//                    text = "Nós te ajudamos a encontrar a quadra perfeita para você.",
+//                    style = TextStyle(
+//                        fontWeight = FontWeight.Normal,
+//                        fontSize = 14.sp,
+//                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+//                        color = Color.Gray.copy(alpha = 0.8f)
+//                    ),
+//                    modifier = Modifier
+//                        .padding(bottom = 16.dp)
+//                        .width(270.dp)
+//                )
             }
         }
         Row {
@@ -202,8 +206,20 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (User) -> Unit, onSi
                 Button(
                     onClick = {
                         scope.launch(Dispatchers.IO) {
-                            val loginn = "boo@gmail.com"
+                            val loginn = "peter@mail.com"
                             val passwordd = "12345"
+                            val dtoUserLogin = DTOUserLogin(loginn, passwordd)
+                            val dtoUser = login(dtoUserLogin)
+
+                            if (dtoUser.id.isEmpty()) {
+                                mensagemErro = "Não foi possível fazer o login!"
+                            } else {
+                                // Navegação deve ocorrer na main thread
+                                withContext(Dispatchers.Main) {
+                                    onSignInClick(dtoUser)
+                                }
+                            }
+
 //                    userDAO.findByEmail(login, callback = { user ->
 //                        if (user != null && user.password == password) {
 //                            onSignInClick(user)
@@ -211,13 +227,13 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (User) -> Unit, onSi
 //                            mensagemErro = "Login ou senha inválidos!"
 //                        }
 //                    })
-                            userDAO.findByEmail(loginn, callback = { user ->
-                                if (user != null && user.password == passwordd) {
-                                    onSignInClick(user)
-                                } else {
-                                    mensagemErro = "Login ou senha inválidos!"
-                                }
-                            })
+//                            userDAO.findByEmail(loginn, callback = { user ->
+//                                if (user != null && user.password == passwordd) {
+//                                    onSignInClick(user)
+//                                } else {
+//                                    mensagemErro = "Login ou senha inválidos!"
+//                                }
+//                            })
                         }
                     },
                     modifier = Modifier
@@ -338,5 +354,11 @@ fun GoogleLoginButton(
                 color = themeColor.copy(alpha = 0.8f)// Color.Gray.copy(alpha = 0.99f)
             )
         }
+    }
+}
+
+suspend fun login(dtoUserLogin: DTOUserLogin): DTOUser {
+    return withContext(Dispatchers.IO) {
+        RetrofitClient.userService.login(dtoUserLogin)
     }
 }

@@ -1,17 +1,33 @@
 package com.example.iquadras.model.restClient
 
-import com.example.iquadras.model.adress.AdressServiceIF
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
-    private const val BASE_URL = "https://viacep.com.br/ws/"
+    private const val BASE_URL = "http://10.0.2.2:8080/api/v1/"
+    // private const val BASE_URL = "http://192.168.0.11:8080/api/v1/"
 
-    val adressService: AdressServiceIF by lazy {
+    val userService: UserServiceIF by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(AdressServiceIF::class.java)
+            .create(UserServiceIF::class.java)
+    }
+
+    val courtService: CourtServiceIF by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(CourtServiceIF::class.java)
+    }
+
+    val bookingService: BookingServiceIF by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(BookingServiceIF::class.java)
     }
 }
