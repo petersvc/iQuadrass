@@ -57,7 +57,7 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeActivity(modifier: Modifier = Modifier, onLogoffClick: () -> Unit, user: User) {
+fun HomeActivity(modifier: Modifier = Modifier, onLogoffClick: () -> Unit, onCourtClick: (Court) -> Unit, user: User) {
     val scope = rememberCoroutineScope()
     val courts = remember { mutableStateListOf<Court>() }
 
@@ -145,9 +145,7 @@ fun HomeActivity(modifier: Modifier = Modifier, onLogoffClick: () -> Unit, user:
             .fillMaxHeight()
             .weight(1f)
         ) {
-//            FeaturedCourts(modifier, courts)
-//            NearbyCourts(modifier, courts)
-            CourtsListColumn(courts)
+            CourtsListColumn(courts, onCourtClick)
         }
 
 

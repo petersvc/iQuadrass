@@ -1,6 +1,7 @@
 package com.example.iquadras.ui.telas.home.component
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,28 +33,31 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.iquadras.R
 import com.example.iquadras.model.court.Court
+import com.example.iquadras.model.user.User
 import com.example.iquadras.ui.telas.themeColor
 
 @Composable
-fun CourtsListColumn(courts: List<Court>) {
+fun CourtsListColumn(courts: List<Court>, onCourtClick: (Court) -> Unit) {
     LazyColumn () {
         items(courts) { court ->
-            CourtCardColumn(court = court)
+            CourtCardColumn(court = court, onCourtClick = onCourtClick)
         }
     }
 }
 
 @Composable
-fun CourtCardColumn(court: Court) {
+fun CourtCardColumn(court: Court, onCourtClick: (Court) -> Unit) {
     Card(
         modifier = Modifier
             .padding(8.dp)
             .fillMaxWidth()
-            .clip(RoundedCornerShape(80.dp)),
+            .clip(RoundedCornerShape(80.dp))
+            .clickable { onCourtClick(court) },
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.0f), //Card background color
+            containerColor = Color.White.copy(alpha = 0.0f),
         ),
     ) {
         Row(
@@ -71,7 +74,7 @@ fun CourtCardColumn(court: Court) {
                         .clip(RoundedCornerShape(80.dp))
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.quadravoley),
+                        painter = rememberAsyncImagePainter(court.imageUrl),
                         contentDescription = null,
                         modifier = Modifier.fillMaxHeight(),
                         alignment = Alignment.CenterStart,

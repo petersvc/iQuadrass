@@ -15,4 +15,6 @@ data class Court(
     val type: String = "", // beach, court, field...
     val capacity: Int = 0,
     val score: Double = 0.0,
+    val imageUrl: String = "",
+    val address: String = "",
 )

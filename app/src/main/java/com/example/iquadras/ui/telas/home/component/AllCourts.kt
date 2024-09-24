@@ -37,5 +37,5 @@ fun AllCourts(modifier: Modifier, courts: List<Court>) {
     }
 
     val nearbyCourts = courts.filter { it.capacity > 5 } // Filter courts with capacity > 10
-    CourtsListColumn(nearbyCourts)
+    // CourtsListColumn(nearbyCourts)
 }

@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.example.iquadras.R
 import com.example.iquadras.model.user.User
 
@@ -122,7 +123,7 @@ fun Header(
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.profile2), // Altere para o avatar correto
+                        painter = rememberAsyncImagePainter(user.imageUrl) ,// painterResource(id = R.drawable.profile2), // Altere para o avatar correto
                         contentDescription = "Foto de perfil",
                         modifier = Modifier
                             //.padding(top = 7.dp)
