@@ -10,5 +10,4 @@ fun BookingList(
     user: User, // Recebendo o usuário logado
 
 ) {
-
 }

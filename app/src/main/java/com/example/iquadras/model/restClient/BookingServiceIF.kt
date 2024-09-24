@@ -1,6 +1,7 @@
 package com.example.iquadras.model.restClient
 
 import com.example.iquadras.model.booking.Booking
+import com.example.iquadras.model.booking.DTOBooking
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -16,7 +17,7 @@ interface BookingServiceIF {
     suspend fun getAllBookingss(): List<Booking>
 
     @POST("booking")
-    suspend fun createBooking(@Body booking: Booking): String
+    suspend fun createBooking(@Body booking: DTOBooking): Booking
 
     @DELETE("booking/{id}")
     suspend fun deleteBooking(@Path("id") id: Long): String

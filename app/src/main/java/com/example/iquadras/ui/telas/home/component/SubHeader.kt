@@ -51,7 +51,6 @@ fun SubHeader(modifier: Modifier = Modifier) {
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 32.sp,
                                 color = themeColor.copy(alpha = 0.99f)
-                                // color = themeColor
                             )
                         ) {
                             append("Quadra.")

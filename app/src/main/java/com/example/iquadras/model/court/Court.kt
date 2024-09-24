@@ -12,7 +12,7 @@ data class Court(
     val latitude: String = "",
     val longitude: String = "",
     val sports: List<String> = emptyList(),
-    val type: String = "", // beach, court, field...
+    val type: String = "",
     val capacity: Int = 0,
     val score: Double = 0.0,
     val imageUrl: String = "",

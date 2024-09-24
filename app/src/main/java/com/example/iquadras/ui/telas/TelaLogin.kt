@@ -70,7 +70,7 @@ val themeColor = Color(0xFF6C56F2)
 fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (DTOUser) -> Unit, onSignUpClick: () -> Unit) {
 
     val context = LocalContext.current
-    var scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()
     var login by remember { mutableStateOf("") } // email
     var password by remember { mutableStateOf("") }
     var mensagemErro by remember { mutableStateOf<String?>(null) }
@@ -206,7 +206,7 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (DTOUser) -> Unit, o
                 Button(
                     onClick = {
                         scope.launch(Dispatchers.IO) {
-                            val loginn = "peter@mail.com"
+                            val loginn = "joana@mail.com"
                             val passwordd = "12345"
                             val dtoUserLogin = DTOUserLogin(loginn, passwordd)
                             val dtoUser = login(dtoUserLogin)

@@ -44,11 +44,12 @@ fun UserProfileDialog(
     var showConfirmDeleteDialog by remember { mutableStateOf(false) } // Controla a exibição do diálogo de confirmação
 
     // Sempre que o dialog for exibido, buscamos o usuário do banco
-    LaunchedEffect(userDTO.id) {
-        userDao.findById(userDTO.id) { fetchedUser ->
-            user = fetchedUser
-        }
-    }
+//    LaunchedEffect(userDTO.id) {
+//        userDao.findById(userDTO.id) { fetchedUser ->
+//            user = fetchedUser
+//        }
+//    }
+    user = userDTO
 
     // Exibe um texto de carregamento enquanto os dados não foram carregados
     if (user == null) {

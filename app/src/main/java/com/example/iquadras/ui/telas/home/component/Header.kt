@@ -137,16 +137,16 @@ fun Header(
     }
 
     // Modal de Perfil do Usuário
-//    if (showDialog) {
-//        UserProfileDialog(
-//            userDTO = user, // Passando o objeto User para o modal
-//            onDismiss = { showDialog = false },
-//            onDeleteClick = {
-//                showDialog = false
-//            },
-//            onLogoffClick
-//
-//        )
-//    }
+    if (showDialog) {
+        UserProfileDialog(
+            userDTO = user, // Passando o objeto User para o modal
+            onDismiss = { showDialog = false },
+            onDeleteClick = {
+                showDialog = false
+            },
+            onLogoffClick
+
+        )
+    }
 }
 

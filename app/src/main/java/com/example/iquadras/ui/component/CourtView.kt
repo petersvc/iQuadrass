@@ -1,7 +1,8 @@
 package com.example.iquadras.ui.component
 
-import android.annotation.SuppressLint
-import android.content.Context
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -36,12 +39,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.example.iquadras.R
+import com.example.iquadras.model.booking.Booking
+import com.example.iquadras.model.booking.DTOBooking
 import com.example.iquadras.model.court.Court
+import com.example.iquadras.model.restClient.RetrofitClient
 import com.example.iquadras.model.user.User
 import com.example.iquadras.ui.telas.themeColor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
 
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CourtView(court: Court, user: User) {
     val robotoCondensed = FontFamily(
@@ -50,6 +62,18 @@ fun CourtView(court: Court, user: User) {
 
     // Estado para controlar o modal de reserva
     var openDialog by remember { mutableStateOf(false) }
+
+    var selectedDate by remember { mutableStateOf("") }
+    var duration by remember { mutableStateOf("") }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var selectedTime by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 
     Box(
         modifier = Modifier
@@ -62,14 +86,14 @@ fun CourtView(court: Court, user: User) {
             contentDescription = "Court Image",
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .height(300.dp)
+                .height(250.dp)
                 .fillMaxWidth()
         )
 
         // Coluna com cantos arredondados sobreposta à imagem
         Column(
             modifier = Modifier
-                .padding(top = 275.dp) // Mover a coluna para que sobreponha a imagem
+                .padding(top = 225.dp) // Mover a coluna para que sobreponha a imagem
                 .clip(RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
                 .background(Color.White)
                 .fillMaxSize()
@@ -164,7 +188,7 @@ fun CourtView(court: Court, user: User) {
                             modifier = Modifier.size(56.dp)
                         )
                         Text(
-                            text = user.name,
+                            text = "3km",
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Black.copy(alpha = 0.7f),
                             modifier = Modifier.padding(top = 8.dp)
@@ -176,7 +200,7 @@ fun CourtView(court: Court, user: User) {
                             .width(200.dp)
                     ) {
                         Text(
-                            text = "Avenida Mar Vermelho, 123, Cabedelo - PB",
+                            text = court.address , //"Avenida Mar Vermelho, 123, Cabedelo - PB",
                             style = MaterialTheme.typography.bodyMedium,
                             fontSize = 14.sp,
                             color = Color.Black.copy(alpha = 0.4f),
@@ -259,20 +283,155 @@ fun CourtView(court: Court, user: User) {
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .padding(vertical = 30.dp)
+                ) {
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .padding(end = 5.dp)
+                            .width(0.dp),
+                        thickness = 2.dp,
+                        color = Color.Gray.copy(alpha = 0.15f)
+                    )
+                    Text(
+                        text = "Reservar",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 18.sp,
+                        color = themeColor.copy(alpha = 0.7f)
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .padding(start = 15.dp)
+                            .fillMaxWidth(),
+                        thickness = 2.dp,
+                        color = Color.Gray.copy(alpha = 0.15f),
 
-                // Descrição da quadra
-                Text(
-                    text = court.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(vertical = 8.dp)
-                )
+                    )
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    // Coluna para escolher o dia
+                    Column(
+                        modifier = Modifier // Faz a coluna ocupar metade da largura
+                            .weight(1f)
+                    ) {
+                        val dateBtn = selectedDate.ifEmpty { "Escolha o Dia" }
+                        Button(
+                            onClick = { showDatePicker = true },  // Abre o modal ao clicar
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .border(1.dp, Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(16.dp)),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.Black.copy(alpha = 0.8f)
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(), // Para preencher a largura total do botão
+                                horizontalArrangement = Arrangement.Start // Para alinhar o conteúdo à esquerda
+                            ) {
+                                Text(
+                                    text = dateBtn,
+                                    style = TextStyle(fontWeight = FontWeight.Medium, color = Color.Gray.copy(alpha = 0.8f))                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
+                    // Coluna para duração
+                    Column(
+                        modifier = Modifier // Faz a coluna ocupar metade da largura
+                            .weight(1f)
+                    ) {
+                        OutlinedTextField(
+                            value = duration, //duration,
+                            onValueChange = { duration = it },
+                            placeholder = {
+                                Text(
+                                    text = "Duração em horas",
+                                    style = TextStyle(fontWeight = FontWeight.Medium, color = Color.Gray.copy(alpha = 0.8f))
+                                )
+                            },
+                            textStyle = TextStyle(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            colors = TextFieldDefaults.textFieldColors(
+                                containerColor = Color.Gray.copy(alpha = 0f),
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(52.dp)
+                                .border(1.dp, Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
+                        )
+                    }
+                }
+
+                Row {
+                    val timeBtn = selectedTime.ifEmpty { "Escolha o Horário" }
+                    Button(
+                        onClick = { showTimePicker = true },  // Abre o modal ao clicar
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .border(1.dp, Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(16.dp)),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Transparent,
+                            contentColor = Color.Black.copy(alpha = 0.8f)
+                        ),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(), // Para preencher a largura total do botão
+                            horizontalArrangement = Arrangement.Start // Para alinhar o conteúdo à esquerda
+                        ) {
+                            Text(
+                                text = timeBtn,
+                                style = TextStyle(fontWeight = FontWeight.Medium, color = Color.Gray.copy(alpha = 0.8f))                                )
+                        }
+                    }
+                }
+
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // Botão para reservar a quadra
                 Button(
-                    onClick = { openDialog = true },  // Abre o modal ao clicar
+                    onClick = {
+                        scope.launch(Dispatchers.IO) {
+                            try {
+                                val booking = DTOBooking(
+                                    userId = user.id.toLong(),
+                                    courtId = court.id.toLong(),
+                                    date = selectedDate,
+                                    startTime = selectedTime,
+                                    durationHours = duration.toInt() // se necessário
+                                )
+
+                                val createdBooking = createBooking(booking)
+                                withContext(Dispatchers.Main) {
+                                    // Atualizar UI ou exibir mensagem de sucesso
+                                    Log.d("Booking", "Booking created: $createdBooking")
+                                }
+                            } catch (e: Exception) {
+                                withContext(Dispatchers.Main) {
+                                    // Lidar com o erro na UI (ex: mostrar um Toast)
+                                    Log.e("Booking", "Error creating booking: ${e.message}")
+                                }
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 24.dp)
@@ -285,44 +444,10 @@ fun CourtView(court: Court, user: User) {
                 ) {
                     Text(text = "Reservar", style = MaterialTheme.typography.bodyLarge)
                 }
-            }
-        }
-    }
-    // Modal de reserva
-    if (openDialog) {
-        ReserveCourtDialog(onDismiss = { openDialog = false })
-    }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ReserveCourtDialog(onDismiss: () -> Unit) {
-    var selectedDate by remember { mutableStateOf("") }
-    var selectedTime by remember { mutableStateOf("") }
-    var duration by remember { mutableStateOf("") }
-    var showDatePicker by remember { mutableStateOf(false) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(text = "Reservar Quadra", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-        },
-        text = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = selectedDate,
-                    onValueChange = { /* Não faz nada aqui, o valor é atualizado pelo DatePicker */ },
-                    label = { Text("Escolha o Dia") },
-                    modifier = Modifier.clickable { showDatePicker = true }, // Mostra o DatePicker ao clicar
-                    readOnly = true // Impede digitação manual
-                )
-
-                // Exibir DatePicker se showDatePicker for verdadeiro
                 if (showDatePicker) {
                     DatePickerDialog(
+                        showDatePicker = showDatePicker,
                         onDismissRequest = { showDatePicker = false },
                         onDateSelected = { date ->
                             selectedDate = date // Atualiza a data selecionada
@@ -330,61 +455,173 @@ fun ReserveCourtDialog(onDismiss: () -> Unit) {
                         }
                     )
                 }
-
-                OutlinedTextField(
-                    value = selectedTime,
-                    onValueChange = { selectedTime = it },
-                    label = { Text("Escolha o Horário") }
-                )
-                OutlinedTextField(
-                    value = duration,
-                    onValueChange = { duration = it },
-                    label = { Text("Duração (em horas)") }
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    // Lógica para reservar quadra com as informações inseridas
-                    onDismiss()
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Confirmar Reserva")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                if (showTimePicker) {
+                    TimePickerDialog(
+                        showTimePicker = showTimePicker,
+                        onDismissRequest = { showTimePicker = false },
+                        onTimeSelected = { time ->
+                            selectedTime = time // Atualiza a hora selecionada
+                            showTimePicker = false // Fecha o TimePicker
+                        }
+                    )
+                }
             }
         }
-    )
+    }
+    // Modal de reserva
+    if (openDialog) {
+        //ReserveCourtDialog(onDismiss = { openDialog = false })
+    }
 }
 
 // Composable para o DatePickerDialog
 @Composable
-fun DatePickerDialog(onDismissRequest: () -> Unit, onDateSelected: (String) -> Unit) {
+fun DatePickerDialog(
+    onDismissRequest: () -> Unit,
+    onDateSelected: (String) -> Unit,
+    showDatePicker: Boolean
+) {
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
 
-    // Criar um DatePickerDialog apenas quando a função é chamada
-    val datePickerDialog = android.app.DatePickerDialog(
-        context,
-        { _, year, month, dayOfMonth ->
-            val date = "$dayOfMonth/${month + 1}/$year"
-            onDateSelected(date)
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    )
+    // Usar um remember para manter a referência do dialog
+    val datePickerDialog = remember {
+        android.app.DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                // Formatação para garantir que o dia e o mês tenham dois dígitos
+                val formattedDay = String.format("%02d", dayOfMonth)
+                val formattedMonth = String.format("%02d", month + 1) // O mês é zero-based
+                val date = "$formattedDay/$formattedMonth/$year" // Formato final: dd/MM/yyyy
+                onDateSelected(date)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).apply {
+            setOnDismissListener {
+                onDismissRequest() // Notifica quando o dialogo é fechado
+            }
+        }
+    }
 
-    // Dismiss listener para o dialog
-    datePickerDialog.setOnDismissListener { onDismissRequest() }
-
-    // Mostra o DatePickerDialog
-    LaunchedEffect(Unit) {
-        datePickerDialog.show()
+    // Mostra o dialog se o dialog ainda não tiver sido exibido
+    LaunchedEffect(showDatePicker) {
+        if (showDatePicker) {
+            datePickerDialog.show()
+        }
     }
 }
+
+
+@Composable
+fun TimePickerDialog(
+    onDismissRequest: () -> Unit,
+    onTimeSelected: (String) -> Unit,
+    showTimePicker: Boolean
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    // Usar um remember para manter a referência do dialog
+    val timePickerDialog = remember {
+        android.app.TimePickerDialog(
+            context,
+            { _, hourOfDay, minute ->
+                // Formata a hora em HH:mm
+                val time = String.format("%02d:%02d", hourOfDay, minute)
+                onTimeSelected(time)
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true // true para formato 24 horas, false para formato 12 horas
+        ).apply {
+            setOnDismissListener {
+                onDismissRequest() // Notifica quando o dialogo é fechado
+            }
+        }
+    }
+
+    // Mostra o dialog se o dialog ainda não tiver sido exibido
+    LaunchedEffect(showTimePicker) {
+        if (showTimePicker) {
+            timePickerDialog.show()
+        }
+    }
+}
+
+suspend fun createBooking(booking: DTOBooking): Booking {
+    return withContext(Dispatchers.IO) {
+        RetrofitClient.bookingService.createBooking(booking)
+    }
+}
+
+
+
+
+
+
+
+
+
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun ReserveCourtDialog(onDismiss: () -> Unit) {
+//    var selectedDate by remember { mutableStateOf("") }
+//    var selectedTime by remember { mutableStateOf("") }
+//    var duration by remember { mutableStateOf("") }
+//    var showDatePicker by remember { mutableStateOf(false) }
+//
+//    // AlertDialog
+//    AlertDialog(
+//        onDismissRequest = onDismiss,
+//        title = {
+//            Text(text = "Reservar Quadra", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+//        },
+//        text = {
+//            Column(
+//                verticalArrangement = Arrangement.spacedBy(8.dp),
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                OutlinedTextField(
+//                    value = selectedDate,
+//                    onValueChange = { /* Não faz nada aqui, o valor é atualizado pelo DatePicker */ },
+//                    label = { Text("Escolha o Dia") },
+//                    modifier = Modifier.clickable { showDatePicker = true }, // Mostra o DatePicker ao clicar
+//                    readOnly = true // Impede digitação manual
+//                )
+//
+//                OutlinedTextField(
+//                    value = selectedTime,
+//                    onValueChange = { selectedTime = it },
+//                    label = { Text("Escolha o Horário") }
+//                )
+//                OutlinedTextField(
+//                    value = duration,
+//                    onValueChange = { duration = it },
+//                    label = { Text("Duração (em horas)") }
+//                )
+//            }
+//        },
+//        confirmButton = {
+//            Button(
+//                onClick = {
+//                    // Lógica para reservar quadra com as informações inseridas
+//                    onDismiss()
+//                },
+//                modifier = Modifier.fillMaxWidth()
+//            ) {
+//                Text("Confirmar Reserva")
+//            }
+//        },
+//        dismissButton = {
+//            TextButton(onClick = onDismiss) {
+//                Text("Cancelar")
+//            }
+//        }
+//    )
+//
+//    // Mostrar o DatePickerDialog se showDatePicker for verdadeiro
+//
+//}
+//
