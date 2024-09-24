@@ -57,7 +57,13 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeActivity(modifier: Modifier = Modifier, onLogoffClick: () -> Unit, onCourtClick: (Court) -> Unit, user: User) {
+fun HomeActivity(
+    modifier: Modifier = Modifier,
+    onLogoffClick: () -> Unit,
+    onCourtClick: (Court) -> Unit,
+    user: User,
+    onReservationsClick: () -> Unit
+) {
     val scope = rememberCoroutineScope()
     val courts = remember { mutableStateListOf<Court>() }
 
@@ -78,7 +84,7 @@ fun HomeActivity(modifier: Modifier = Modifier, onLogoffClick: () -> Unit, onCou
             .padding(16.dp)
     ) {
 
-        Header(onLogoffClick = onLogoffClick, modifier = Modifier, user = user)
+        Header(onLogoffClick = onLogoffClick, modifier = Modifier, user = user, onReservationsClick = onReservationsClick)
 
         SubHeader()
 

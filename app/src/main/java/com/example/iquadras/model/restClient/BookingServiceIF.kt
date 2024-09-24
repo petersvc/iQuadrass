@@ -14,7 +14,7 @@ interface BookingServiceIF {
     suspend fun getBooking(@Path("id") id: Long): Booking
 
     @GET("booking")
-    suspend fun getAllBookingss(): List<Booking>
+    suspend fun getAllBookings(): List<Booking>
 
     @POST("booking")
     suspend fun createBooking(@Body booking: DTOBooking): Booking

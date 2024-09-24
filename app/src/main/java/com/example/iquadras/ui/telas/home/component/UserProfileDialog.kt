@@ -52,10 +52,10 @@ fun UserProfileDialog(
     user = userDTO
 
     // Exibe um texto de carregamento enquanto os dados não foram carregados
-    if (user == null) {
-        Text("Carregando dados do usuário...")
-        return
-    }
+//    if (user == null) {
+//        Text("Carregando dados do usuário...")
+//        return
+//    }
 
     // O diálogo principal de perfil do usuário (somente se `showEditDialog` for falso)
     if (!showEditDialog && !showConfirmDeleteDialog) {

@@ -1,11 +1,14 @@
 package com.example.iquadras
 
+import ReservationsScreen
 import android.net.Uri
+import android.os.Build
 import com.google.gson.Gson
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -24,6 +27,7 @@ import com.example.iquadras.ui.theme.IquadrasTheme
 import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
@@ -71,6 +75,10 @@ class MainActivity : ComponentActivity() {
                                     val courtJson = Uri.encode(Gson().toJson(court))
                                     val userJsonForCourt = Uri.encode(Gson().toJson(user))
                                     navController.navigate("courtview/$courtJson/$userJsonForCourt")
+                                },
+                                onReservationsClick = {
+                                    val userJson = Uri.encode(Gson().toJson(user))
+                                    navController.navigate("reservations/$userJson")
                                 }
                             )
                         }
@@ -85,6 +93,14 @@ class MainActivity : ComponentActivity() {
 
                             // Passar ambos para a CourtView
                             CourtView(court = court, user = user)
+                        }
+
+                        composable("reservations/{userJson}") { backStackEntry ->
+                            val userJson = backStackEntry.arguments?.getString("userJson")
+                            val user = Gson().fromJson(userJson, User::class.java)
+                            ReservationsScreen(
+                                user = user,// Função que busca as reservas do usuário
+                            )
                         }
 
                     }

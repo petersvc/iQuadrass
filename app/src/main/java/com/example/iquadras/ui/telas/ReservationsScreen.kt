@@ -1,65 +1,134 @@
-//package com.example.iquadras.ui.telas
-//
-//import androidx.compose.foundation.layout.*
-//import androidx.compose.foundation.lazy.LazyColumn
-//import androidx.compose.material3.*
-//import androidx.compose.runtime.*
-//import androidx.compose.ui.Modifier
-//import androidx.compose.ui.text.font.FontWeight
-//import androidx.compose.ui.unit.dp
-//import androidx.compose.ui.unit.sp
-//import com.example.iquadras.model.court.Court
-//
-//@Composable
-//fun ReservationsScreen(
-//    courts: List<Court>,
-//    onCourtClick: (Court) -> Unit
-//) {
-//    Column(
-//        modifier = Modifier
-//            .padding(16.dp)
-//            .fillMaxWidth()
-//    ) {
-//        Text(
-//            text = "Quadras Reservadas",
-//            fontSize = 24.sp,
-//            fontWeight = FontWeight.Bold
-//        )
-//
-//        Spacer(modifier = Modifier.height(16.dp))
-//
-//        if (courts.isEmpty()) {
-//            Text("Você ainda não reservou nenhuma quadra.")
-//        } else {
-//            LazyColumn(
-//                verticalArrangement = Arrangement.spacedBy(8.dp),
-//                modifier = Modifier.fillMaxSize()
-//            ) {
-//                items(courts.size) { index ->
-//                    val court = courts[index]
-//                    ReservedCourtItem(court = court, onClick = { onCourtClick(court) })
-//                }
-//            }
-//        }
-//    }
-//}
-//
-//@Composable
-//fun ReservedCourtItem(
-//    court: Court,
-//    onClick: () -> Unit
-//) {
-//    Card(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(8.dp),
-//        onClick = onClick
-//    ) {
-//        Column(modifier = Modifier.padding(16.dp)) {
-//            Text(text = "Quadra: ${court.name}", fontWeight = FontWeight.Bold)
-//            Text(text = "Localização: ${court.latitude}, ${court.longitude}")
-//            Text(text = "Preço: R$ ${court.price}")
-//            //Text(text = "Esportes: ${court.sports.joinToString(", ")}")
-//        }
-//    }
-//}
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.iquadras.model.booking.Booking
+import com.example.iquadras.model.restClient.RetrofitClient
+import com.example.iquadras.model.user.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ReservationsScreen(
+    modifier: Modifier = Modifier,
+    user: User,
+) {
+    val scope = rememberCoroutineScope()
+    val bookings = remember { mutableStateListOf<Booking>() }
+
+    LaunchedEffect(Unit) {
+        scope.launch(Dispatchers.IO) {
+            val bookingsFetched = getAllBookings()
+            // filtre as bookings para mostrar apenas as do usuário logado
+            val bookingsFetchedFiltered = bookingsFetched.filter { it.userId.toString() == user.id }
+            bookings.clear()
+            bookings.addAll(bookingsFetchedFiltered)
+        }
+    }
+
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Minhas Reservas",
+            style = MaterialTheme.typography.headlineSmall.copy(fontSize = 24.sp),
+            modifier = Modifier.padding(top = 56.dp, bottom = 16.dp)
+        )
+
+        if (bookings.isEmpty()) {
+            Text(
+                text = "Você não tem reservas ativas no momento.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                items(bookings) { booking ->
+                    BookingCard(
+                        booking = booking,
+                        onClick = { "implementar" }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BookingCard(
+    booking: Booking,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 8.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.elevatedCardElevation(4.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Quadra: ${booking.id}",
+                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
+                color = Color.Black.copy(alpha = 0.8f)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Data: ${booking.date}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Black.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Horário: ${booking.startTime}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Black.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Duração: ${booking.durationHours} horas",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Black.copy(alpha = 0.6f)
+            )
+        }
+    }
+}
+
+
+suspend fun getAllBookings(): List<Booking> {
+    return withContext(Dispatchers.IO) {
+        RetrofitClient.bookingService.getAllBookings()
+    }
+}

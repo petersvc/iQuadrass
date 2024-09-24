@@ -15,12 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,14 +32,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.iquadras.R
 import com.example.iquadras.model.user.User
-
 
 
 @Composable
@@ -48,8 +44,11 @@ fun Header(
     onLogoffClick: () -> Unit,
     modifier: Modifier = Modifier,
     user: User, // Recebendo o usuário logado
+    onReservationsClick: () -> Unit,
 
-) {
+    ) {
+    var showMainDialog by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) } // Controla se o modal de perfil deve ser exibido
 
     Row(
@@ -119,7 +118,8 @@ fun Header(
                         .clip(CircleShape)
                         .background(Color.Gray.copy(alpha = 0.1f))
                         .border(3.dp, Color.Gray.copy(alpha = 0.0f), CircleShape)
-                        .clickable { showDialog = true }, // Abre o modal ao clicar na imagem
+                        .clickable { showMenu = !showMenu },
+                        //.clickable { showMainDialog = true }, // Abre o modal ao clicar na imagem
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -132,8 +132,50 @@ fun Header(
                         contentScale = ContentScale.Crop
                     )
                 }
+
+                // Menu dropdown que aparece ao clicar na imagem
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false },
+                    modifier = Modifier
+                        .width(150.dp)
+                ) {
+                    DropdownMenuItem(onClick = {
+                        // Ação ao clicar em "Reservas"
+                        onReservationsClick()
+                        showMenu = false
+                    }) {
+                        Text("Reservas")
+                    }
+                    DropdownMenuItem(onClick = {
+                        // Ação ao clicar em "Perfil"
+                        showMenu = false
+                        showDialog = true // Abre o modal de perfil
+                    }) {
+                        Text("Perfil")
+                    }
+                    DropdownMenuItem(onClick = {
+                        // Ação ao clicar em "Sair"
+                        showMenu = false
+                        onLogoffClick() // Chama a função de logoff
+                    }) {
+                        Text("Sair")
+                    }
+                }
             }
         }
+    }
+
+    // Modal com opções: Reservas, Perfil, Sair
+    if (showMainDialog) {
+        MainOptionsDialog(
+            onDismiss = { showMainDialog = false },
+            onProfileClick = {
+                showMainDialog = false // Fecha o modal de opções
+                showDialog = true // Abre o modal de perfil
+            },
+            onLogoffClick = onLogoffClick
+        )
     }
 
     // Modal de Perfil do Usuário
@@ -150,3 +192,49 @@ fun Header(
     }
 }
 
+// Modal com 3 opções: Reservas, Perfil e Sair
+@Composable
+fun MainOptionsDialog(
+    onDismiss: () -> Unit,
+    onProfileClick: () -> Unit,
+    onLogoffClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Transparent),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .background(Color.White)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Reservas",
+                modifier = Modifier
+                    .clickable {
+                        // Ação para "Reservas"
+                        onDismiss()
+                    }
+                    .padding(8.dp)
+            )
+            Text(
+                text = "Perfil",
+                modifier = Modifier
+                    .clickable {
+                        onProfileClick()
+                    }
+                    .padding(8.dp)
+            )
+            Text(
+                text = "Sair",
+                modifier = Modifier
+                    .clickable {
+                        onLogoffClick()
+                    }
+                    .padding(8.dp)
+            )
+        }
+    }
+}
