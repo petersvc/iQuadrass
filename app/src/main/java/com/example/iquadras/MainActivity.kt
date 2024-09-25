@@ -77,8 +77,8 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("courtview/$courtJson/$userJsonForCourt")
                                 },
                                 onReservationsClick = {
-                                    val userJson = Uri.encode(Gson().toJson(user))
-                                    navController.navigate("reservations/$userJson")
+                                    val userJson2 = Uri.encode(Gson().toJson(user))
+                                    navController.navigate("reservations/$userJson2")
                                 }
                             )
                         }
@@ -95,9 +95,10 @@ class MainActivity : ComponentActivity() {
                             CourtView(court = court, user = user)
                         }
 
-                        composable("reservations/{userJson}") { backStackEntry ->
-                            val userJson = backStackEntry.arguments?.getString("userJson")
-                            val user = Gson().fromJson(userJson, User::class.java)
+                        composable("reservations/{userJson2}") { backStackEntry ->
+                            val userJson2 = backStackEntry.arguments?.getString("userJson2")
+                            val user = Gson().fromJson(userJson2, User::class.java)
+                            println(user.id)
                             ReservationsScreen(
                                 user = user,// Função que busca as reservas do usuário
                             )

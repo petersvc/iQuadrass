@@ -37,15 +37,15 @@ fun ReservationsScreen(
     user: User,
 ) {
     val scope = rememberCoroutineScope()
-    val bookings = remember { mutableStateListOf<Booking>() }
+    val bookingsList = remember { mutableStateListOf<Booking>() }
 
     LaunchedEffect(Unit) {
         scope.launch(Dispatchers.IO) {
             val bookingsFetched = getAllBookings()
             // filtre as bookings para mostrar apenas as do usuário logado
-            val bookingsFetchedFiltered = bookingsFetched.filter { it.userId.toString() == user.id }
-            bookings.clear()
-            bookings.addAll(bookingsFetchedFiltered)
+            val bookingsFiltered = bookingsFetched.filter { it.user?.id == user.id }
+            bookingsList.clear()
+            bookingsList.addAll(bookingsFiltered)
         }
     }
 
@@ -60,7 +60,7 @@ fun ReservationsScreen(
             modifier = Modifier.padding(top = 56.dp, bottom = 16.dp)
         )
 
-        if (bookings.isEmpty()) {
+        if (bookingsList.isEmpty()) {
             Text(
                 text = "Você não tem reservas ativas no momento.",
                 style = MaterialTheme.typography.bodyMedium,
@@ -71,9 +71,10 @@ fun ReservationsScreen(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                items(bookings) { booking ->
+                items(bookingsList) { booking ->
                     BookingCard(
                         booking = booking,
+                        user = user,
                         onClick = { "implementar" }
                     )
                 }
@@ -85,6 +86,7 @@ fun ReservationsScreen(
 @Composable
 fun BookingCard(
     booking: Booking,
+    user: User,
     onClick: () -> Unit,
 ) {
     Card(
@@ -100,7 +102,7 @@ fun BookingCard(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Quadra: ${booking.id}",
+                text = "Quadra: ${booking.court?.name}",
                 style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp),
                 color = Color.Black.copy(alpha = 0.8f)
             )
