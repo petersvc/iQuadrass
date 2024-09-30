@@ -78,6 +78,8 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.accompanist.permissions.v0320)  // Atualize para a versão mais recente
     implementation(libs.coil.compose) // Verifique se há uma versão mais recente
+    implementation(libs.play.services.maps.v1900)
+
 
 
     implementation(libs.androidx.material)

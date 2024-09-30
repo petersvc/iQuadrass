@@ -1,6 +1,9 @@
 package com.example.iquadras
 
-import ReservationsScreen
+import BookingsScreen
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.os.Build
 import com.google.gson.Gson
@@ -12,7 +15,15 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -24,6 +35,11 @@ import com.example.iquadras.ui.telas.TelaCadastro
 import com.example.iquadras.ui.telas.TelaLogin
 import com.example.iquadras.ui.telas.home.HomeActivity
 import com.example.iquadras.ui.theme.IquadrasTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
@@ -35,6 +51,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             IquadrasTheme {
                 val navController = rememberNavController()
+                var currentLocation by remember { mutableStateOf<Location?>(null) }
+
+                // Obtendo a permissão e localização
+                requestLocationPermission()?.let {
+                    currentLocation = it
+                }
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -65,12 +87,15 @@ class MainActivity : ComponentActivity() {
                         composable("main/{userJson}") { backStackEntry ->
                             val userJson = backStackEntry.arguments?.getString("userJson")
                             val user = Gson().fromJson(userJson, User::class.java)
+
+                            // Passando a localização atual para a HomeActivity
                             HomeActivity(
                                 modifier = Modifier.padding(innerPadding),
                                 onLogoffClick = {
                                     navController.navigate("login")
                                 },
                                 user = user,
+                                currentLocation = currentLocation, // Passando a localização
                                 onCourtClick = { court ->
                                     val courtJson = Uri.encode(Gson().toJson(court))
                                     val userJsonForCourt = Uri.encode(Gson().toJson(user))
@@ -82,24 +107,22 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
-                        // Definindo a rota courtview/{courtJson}/{userJsonForCourt}
                         composable("courtview/{courtJson}/{userJsonForCourt}") { backStackEntry ->
                             val courtJson = backStackEntry.arguments?.getString("courtJson")
                             val userJsonForCourt = backStackEntry.arguments?.getString("userJsonForCourt")
 
-                            // Desserializando o Court e o User
                             val court = Gson().fromJson(courtJson, Court::class.java)
                             val user = Gson().fromJson(userJsonForCourt, User::class.java)
 
-                            // Passar ambos para a CourtView
-                            CourtView(court = court, user = user)
+                            // Passando a localização atual para a CourtView
+                            CourtView(court = court, user = user, currentLocation = currentLocation)
                         }
 
                         composable("reservations/{userJson2}") { backStackEntry ->
                             val userJson2 = backStackEntry.arguments?.getString("userJson2")
                             val user = Gson().fromJson(userJson2, User::class.java)
                             println(user.id)
-                            ReservationsScreen(
+                            BookingsScreen(
                                 user = user,// Função que busca as reservas do usuário
                             )
                         }
@@ -112,4 +135,42 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun requestLocationPermission(): Location? {
+    val context = LocalContext.current
+    val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
+    var loc by remember { mutableStateOf<Location?>(null) }
+
+    LaunchedEffect(Unit) {
+        permissionState.launchPermissionRequest()
+    }
+
+    when {
+        permissionState.status.isGranted -> {
+            GetCurrentLocation(context) { location ->
+                location?.let {
+                    loc = location
+                }
+            }
+        }
+    }
+    return loc
+}
+
+@Composable
+fun GetCurrentLocation(context: Context, onLocationReceived: (Location?) -> Unit) {
+    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+
+    LaunchedEffect(Unit) {
+        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                .addOnSuccessListener { location: Location? ->
+                    onLocationReceived(location)
+                }
+        } else {
+            onLocationReceived(null)
+        }
+    }
+}
 

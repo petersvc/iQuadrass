@@ -1,5 +1,7 @@
 package com.example.iquadras.ui.telas.home.component
 
+import android.annotation.SuppressLint
+import android.location.Location
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,26 +32,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Black
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.example.iquadras.R
 import com.example.iquadras.model.court.Court
-import com.example.iquadras.model.user.User
+import com.example.iquadras.ui.component.showDistanceToTarget
 import com.example.iquadras.ui.telas.themeColor
 
 @Composable
-fun CourtsListColumn(courts: List<Court>, onCourtClick: (Court) -> Unit) {
+fun CourtsListColumn(courts: List<Court>, onCourtClick: (Court) -> Unit, currentLocation: Location?) {
     LazyColumn () {
         items(courts) { court ->
-            CourtCardColumn(court = court, onCourtClick = onCourtClick)
+            CourtCardColumn(court = court, onCourtClick = onCourtClick, currentLocation = currentLocation)
         }
     }
 }
 
 @Composable
-fun CourtCardColumn(court: Court, onCourtClick: (Court) -> Unit) {
+fun CourtCardColumn(court: Court, onCourtClick: (Court) -> Unit, currentLocation: Location?) {
     Card(
         modifier = Modifier
             .padding(8.dp)
@@ -97,23 +97,18 @@ fun CourtCardColumn(court: Court, onCourtClick: (Court) -> Unit) {
                                 tint = themeColor.copy(alpha = 0.8f),
                                 modifier = Modifier.size(12.dp)
                             )
+                            val adress = court.address.split(",")
+                            val city = adress[3].trim()
+                            val district = adress[2].trim()
+                            val distanceInKm = showDistanceToTarget(currentLocation, court.latitude, court.longitude)
                             Text(
-                                text = "Cabedelo, Intermares - 4km",
+                                text = "$city, $district - $distanceInKm",
                                 color = themeColor.copy(alpha = 0.8f),
-                                style = MaterialTheme.typography.bodyMedium, fontSize = 12.sp,
+                                style = MaterialTheme.typography.bodyMedium, fontSize = 13.sp,
                                 modifier = Modifier.padding(start = 4.dp)
                             )
                         }
                     }
-//                    Column(Modifier.weight(1f)) {
-//                        val sports = court.sports.joinToString(", ").lowercase()
-//                        Text(
-//                            text = sports,
-//                            color = themeColor.copy(alpha = 0.7f),
-//                            style = MaterialTheme.typography.bodyMedium,
-//                        )
-//                    }
-
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Row {
@@ -126,14 +121,24 @@ fun CourtCardColumn(court: Court, onCourtClick: (Court) -> Unit) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Row {
                     Text(
-                        text = "R$ " + court.price.toString() + "/hora",
+                        text = "R$ " + formatPrice(court.price) + "/hora",
                         color = Black.copy(alpha = 0.6f),
                         style = MaterialTheme.typography.titleMedium, fontSize = 16.sp,
                     )
                 }
-                //Spacer(modifier = Modifier.height(10.dp))
-
             }
         }
+    }
+}
+
+@SuppressLint("DefaultLocale")
+fun formatPrice(price: Double): String {
+    val formattedPrice = String.format("%.2f", price)
+
+    // Verifica se os dois primeiros dígitos após o ponto são zeros
+    return if (formattedPrice.split(".")[1].startsWith("0")) {
+        formattedPrice.split(".")[0]
+    } else {
+        formattedPrice
     }
 }

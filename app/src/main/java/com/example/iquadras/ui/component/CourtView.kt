@@ -1,7 +1,12 @@
 package com.example.iquadras.ui.component
 
+import android.annotation.SuppressLint
+import android.content.Intent
+import android.location.Location
+import android.net.Uri
 import android.os.Build
 import android.util.Log
+import android.widget.NumberPicker
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,6 +23,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -37,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.rememberAsyncImagePainter
 import com.example.iquadras.R
 import com.example.iquadras.model.booking.Booking
@@ -53,9 +60,8 @@ import java.util.Calendar
 import java.util.Locale
 
 @RequiresApi(Build.VERSION_CODES.O)
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CourtView(court: Court, user: User) {
+fun CourtView(court: Court, user: User, currentLocation: Location?) {
     val robotoCondensed = FontFamily(
         Font(R.font.roboto_condensed),
     )
@@ -64,16 +70,15 @@ fun CourtView(court: Court, user: User) {
     var openDialog by remember { mutableStateOf(false) }
 
     var selectedDate by remember { mutableStateOf("") }
-    var duration by remember { mutableStateOf("") }
+    var showDurationPicker by remember { mutableStateOf(false) }
+    var duration by remember { mutableIntStateOf(0) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var selectedTime by remember { mutableStateOf("") }
 
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
-    val dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val scope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -185,10 +190,19 @@ fun CourtView(court: Court, user: User) {
                             imageVector = Icons.Outlined.LocationOn,
                             contentDescription = "Court Location",
                             tint = themeColor,
-                            modifier = Modifier.size(56.dp)
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clickable {
+                                    // Abre o Google Maps na localização da quadra
+                                    val latitude = court.latitude
+                                    val longitude = court.longitude
+                                    val uri = Uri.parse("geo:$latitude,$longitude?q=$latitude,$longitude(${court.name})")
+                                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                                    context.startActivity(intent)
+                                }
                         )
                         Text(
-                            text = "3km",
+                            text = showDistanceToTarget(currentLocation, court.latitude, court.longitude),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Black.copy(alpha = 0.7f),
                             modifier = Modifier.padding(top = 8.dp)
@@ -277,7 +291,7 @@ fun CourtView(court: Court, user: User) {
                                 .padding(bottom = 8.dp)
                         )
                         Text(
-                            text = court.score.toString(), // Exemplo, pode ser dinâmico
+                            text = court.score.toString(),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -308,7 +322,6 @@ fun CourtView(court: Court, user: User) {
                             .fillMaxWidth(),
                         thickness = 2.dp,
                         color = Color.Gray.copy(alpha = 0.15f),
-
                     )
                 }
 
@@ -347,34 +360,45 @@ fun CourtView(court: Court, user: User) {
 
                     Spacer(modifier = Modifier.width(16.dp))
 
+
                     // Coluna para duração
                     Column(
-                        modifier = Modifier // Faz a coluna ocupar metade da largura
-                            .weight(1f)
+                        modifier = Modifier.weight(1f)
                     ) {
-                        OutlinedTextField(
-                            value = duration, //duration,
-                            onValueChange = { duration = it },
-                            placeholder = {
-                                Text(
-                                    text = "Duração em horas",
-                                    style = TextStyle(fontWeight = FontWeight.Medium, color = Color.Gray.copy(alpha = 0.8f))
-                                )
-                            },
-                            textStyle = TextStyle(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            colors = TextFieldDefaults.textFieldColors(
-                                containerColor = Color.Gray.copy(alpha = 0f),
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent
-                            ),
-                            shape = RoundedCornerShape(16.dp),
+                        val durationBtnTxt = if (duration > 0) "$duration horas" else "Escolha a Duração"
+                        Button(
+                            onClick = { showDurationPicker = true }, // Abre o modal de duração
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(52.dp)
-                                .border(1.dp, Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(16.dp))
-                        )
+                                .height(56.dp)
+                                .border(1.dp, Color.Gray.copy(alpha = 0.2f), RoundedCornerShape(16.dp)),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Transparent,
+                                contentColor = Color.Black.copy(alpha = 0.8f)
+                            ),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(), // Para preencher a largura total do botão
+                                horizontalArrangement = Arrangement.Start // Para alinhar o conteúdo à esquerda
+                            ) {
+                                Text(
+                                    text = durationBtnTxt,
+                                    style = TextStyle(fontWeight = FontWeight.Medium, color = Color.Gray.copy(alpha = 0.8f))                                )
+                            }
+                        }
+
+                        // Exibe o Dialog de Duração quando openDurationPicker é verdadeiro
+                        if (showDurationPicker) {
+                            DurationPickerDialog(
+                                onDismiss = { showDurationPicker = false },
+                                onDurationSelected = { selectedDuration ->
+                                    duration = selectedDuration
+                                    showDurationPicker = false
+                                },
+                                initialDuration = duration
+                            )
+                        }
                     }
                 }
 
@@ -414,9 +438,9 @@ fun CourtView(court: Court, user: User) {
                                 val booking = DTOBooking(
                                     userId = user.id.toLong(),
                                     courtId = court.id.toLong(),
-                                    date = selectedDate,
+                                    date = selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE),
                                     startTime = selectedTime,
-                                    durationHours = duration.toInt() // se necessário
+                                    durationHours = duration.toInt()
                                 )
 
                                 val createdBooking = createBooking(booking)
@@ -468,10 +492,6 @@ fun CourtView(court: Court, user: User) {
             }
         }
     }
-    // Modal de reserva
-    if (openDialog) {
-        //ReserveCourtDialog(onDismiss = { openDialog = false })
-    }
 }
 
 // Composable para o DatePickerDialog
@@ -492,7 +512,7 @@ fun DatePickerDialog(
                 // Formatação para garantir que o dia e o mês tenham dois dígitos
                 val formattedDay = String.format("%02d", dayOfMonth)
                 val formattedMonth = String.format("%02d", month + 1) // O mês é zero-based
-                val date = "$formattedDay/$formattedMonth/$year" // Formato final: dd/MM/yyyy
+                val date = "$year-$formattedMonth-$formattedDay" // Formato final: "yyyy-MM-dd"
                 onDateSelected(date)
             },
             calendar.get(Calendar.YEAR),
@@ -521,19 +541,21 @@ fun TimePickerDialog(
     showTimePicker: Boolean
 ) {
     val context = LocalContext.current
-    val calendar = Calendar.getInstance()
+    val calendar = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
 
     // Usar um remember para manter a referência do dialog
     val timePickerDialog = remember {
         android.app.TimePickerDialog(
             context,
-            { _, hourOfDay, minute ->
+            { _, hourOfDay, _ ->
                 // Formata a hora em HH:mm
-                val time = String.format("%02d:%02d", hourOfDay, minute)
+                val time = String.format("%02d:00", hourOfDay)
+                // val time = String.format("%02d:%02d", hourOfDay)
                 onTimeSelected(time)
             },
-            calendar.get(Calendar.HOUR_OF_DAY),
-            calendar.get(Calendar.MINUTE),
+            calendar,
+            0,
+            // calendar.get(Calendar.MINUTE),
             true // true para formato 24 horas, false para formato 12 horas
         ).apply {
             setOnDismissListener {
@@ -550,78 +572,109 @@ fun TimePickerDialog(
     }
 }
 
+@Composable
+fun DurationPickerDialog(
+    onDismiss: () -> Unit,
+    onDurationSelected: (Int) -> Unit,
+    initialDuration: Int
+) {
+    val currentDuration = remember { mutableIntStateOf(initialDuration) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Escolha a Duração") },
+        text = {
+            Column {
+                NumberPicker(
+                    value = currentDuration.intValue,
+                    onValueChange = { currentDuration.intValue = it },
+                    range = 1..15, // Limita a duração de 1 a 24 horas
+                    modifier = Modifier.fillMaxWidth(),
+                    context = LocalContext.current
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                onDurationSelected(currentDuration.intValue) // Passa o valor selecionado
+            }) {
+                Text("Confirmar")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancelar")
+            }
+        }
+    )
+}
+
+@Composable
+fun NumberPicker(
+    value: Int,
+    onValueChange: (Int) -> Unit,
+    range: IntRange,
+    modifier: Modifier,
+    context: android.content.Context
+) {
+    val numberPicker = remember { NumberPicker(context) }
+
+    numberPicker.minValue = range.first
+    numberPicker.maxValue = range.last
+    numberPicker.value = value
+
+    numberPicker.setOnValueChangedListener { _, _, newVal ->
+        onValueChange(newVal)
+    }
+
+    AndroidView(
+        factory = { numberPicker },
+        modifier = modifier
+    )
+}
+
+@Composable
+fun showDistanceToTarget(currentLocation: Location?, lat: Double, lon: Double): String {
+    var locationText by remember { mutableStateOf("") }
+
+    // Cria a localização alvo a partir das coordenadas fornecidas
+    val targetLocation = Location("").apply {
+        latitude = lat
+        longitude = lon
+    }
+
+    currentLocation?.let {
+        // Calcula a distância entre a localização atual e a de destino
+        val distanceInKm = calculateDistance(it, targetLocation) / 1000
+
+        // Formata a distância, mostrando apenas o dígito após o ponto se não for zero
+        locationText = formatDistance(distanceInKm)
+    } ?: run {
+        locationText = "?"
+    }
+
+    return locationText
+}
+
+// Função para calcular a distância entre duas localizações
+fun calculateDistance(location1: Location, location2: Location): Float {
+    return location1.distanceTo(location2) // Retorna a distância em metros
+}
+
+@SuppressLint("DefaultLocale")
+fun formatDistance(distance: Float): String {
+    val formattedDistance = String.format("%.1f", distance)
+
+    // Verifica se os dois primeiros dígitos após o ponto são zeros
+    return if (formattedDistance.split(".")[1].startsWith("0")) {
+        "${formattedDistance.split(".")[0]} km"
+    } else {
+        "$formattedDistance km"
+    }
+}
+
 suspend fun createBooking(booking: DTOBooking): Booking {
     return withContext(Dispatchers.IO) {
         RetrofitClient.bookingService.createBooking(booking)
     }
 }
-
-
-
-
-
-
-
-
-
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun ReserveCourtDialog(onDismiss: () -> Unit) {
-//    var selectedDate by remember { mutableStateOf("") }
-//    var selectedTime by remember { mutableStateOf("") }
-//    var duration by remember { mutableStateOf("") }
-//    var showDatePicker by remember { mutableStateOf(false) }
-//
-//    // AlertDialog
-//    AlertDialog(
-//        onDismissRequest = onDismiss,
-//        title = {
-//            Text(text = "Reservar Quadra", fontWeight = FontWeight.Bold, fontSize = 20.sp)
-//        },
-//        text = {
-//            Column(
-//                verticalArrangement = Arrangement.spacedBy(8.dp),
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                OutlinedTextField(
-//                    value = selectedDate,
-//                    onValueChange = { /* Não faz nada aqui, o valor é atualizado pelo DatePicker */ },
-//                    label = { Text("Escolha o Dia") },
-//                    modifier = Modifier.clickable { showDatePicker = true }, // Mostra o DatePicker ao clicar
-//                    readOnly = true // Impede digitação manual
-//                )
-//
-//                OutlinedTextField(
-//                    value = selectedTime,
-//                    onValueChange = { selectedTime = it },
-//                    label = { Text("Escolha o Horário") }
-//                )
-//                OutlinedTextField(
-//                    value = duration,
-//                    onValueChange = { duration = it },
-//                    label = { Text("Duração (em horas)") }
-//                )
-//            }
-//        },
-//        confirmButton = {
-//            Button(
-//                onClick = {
-//                    // Lógica para reservar quadra com as informações inseridas
-//                    onDismiss()
-//                },
-//                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Text("Confirmar Reserva")
-//            }
-//        },
-//        dismissButton = {
-//            TextButton(onClick = onDismiss) {
-//                Text("Cancelar")
-//            }
-//        }
-//    )
-//
-//    // Mostrar o DatePickerDialog se showDatePicker for verdadeiro
-//
-//}
-//

@@ -21,6 +21,8 @@ materialVersion = "1.5.1"
 navigationRuntimeKtx = "2.7.7"
 navigationCompose = "2.7.7"
 playServicesLocation = "21.3.0"
+playServicesMaps = "YOUR_VERSION"
+playServicesMapsVersion = "19.0.0"
 retrofit = "2.9.0"
 converterGson = "2.9.0"
 kotlinxCoroutinesCore = "1.5.1"
@@ -62,6 +64,8 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
+play-services-maps-v1900 = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMapsVersion" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }

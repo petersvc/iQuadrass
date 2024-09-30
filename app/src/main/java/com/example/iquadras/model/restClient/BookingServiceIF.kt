@@ -7,6 +7,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface BookingServiceIF {
 
@@ -14,7 +15,7 @@ interface BookingServiceIF {
     suspend fun getBooking(@Path("id") id: Long): Booking
 
     @GET("booking")
-    suspend fun getAllBookings(): List<Booking>
+    suspend fun getAllBookings(@Query("userId") userId: Long?): List<Booking>
 
     @POST("booking")
     suspend fun createBooking(@Body booking: DTOBooking): Booking

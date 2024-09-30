@@ -1,7 +1,5 @@
 package com.example.iquadras.ui.telas.home
 
-import android.content.Context
-import android.content.pm.PackageManager
 import android.location.Location
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,10 +32,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
 import com.example.iquadras.model.court.Court
 import com.example.iquadras.model.restClient.RetrofitClient
 import kotlinx.coroutines.Dispatchers
@@ -47,12 +43,6 @@ import com.example.iquadras.ui.telas.home.component.CourtsListColumn
 import com.example.iquadras.ui.telas.home.component.Header
 import com.example.iquadras.ui.telas.home.component.SubHeader
 import com.example.iquadras.ui.telas.themeColor
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
 import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,7 +52,8 @@ fun HomeActivity(
     onLogoffClick: () -> Unit,
     onCourtClick: (Court) -> Unit,
     user: User,
-    onReservationsClick: () -> Unit
+    onReservationsClick: () -> Unit,
+    currentLocation: Location?
 ) {
     val scope = rememberCoroutineScope()
     val courts = remember { mutableStateListOf<Court>() }
@@ -151,7 +142,7 @@ fun HomeActivity(
             .fillMaxHeight()
             .weight(1f)
         ) {
-            CourtsListColumn(courts, onCourtClick)
+            CourtsListColumn(courts, onCourtClick, currentLocation)
         }
 
 
@@ -159,50 +150,75 @@ fun HomeActivity(
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun RequestLocationPermission() {
-    val context = LocalContext.current
-    val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-    var locationText by remember { mutableStateOf("Aguardando localização...") }
+//@OptIn(ExperimentalPermissionsApi::class)
+//@Composable
+//fun RequestLocationPermission() {
+//    val context = LocalContext.current
+//    val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
+//    var locationText by remember { mutableStateOf("Aguardando localização...") }
+//
+//    LaunchedEffect(Unit) {
+//        permissionState.launchPermissionRequest()
+//    }
+//
+//    when {
+//        permissionState.status.isGranted -> {
+//            //Text(text = "Permissão concedida. Buscando localização...")
+//            GetCurrentLocation(context) { location ->
+//                location?.let {
+//                    locationText = "Latitude: ${it.latitude}, Longitude: ${it.longitude}"
+//                }
+//            }
+//        }
+//        permissionState.status.shouldShowRationale -> {
+//            Text(text = "Precisamos da permissão para mostrar sua localização.")
+//        }
+//        else -> {
+//            Text(text = "Permissão negada permanentemente.")
+//        }
+//    }
+//
+//    Text(text = "Localização: $locationText")
+//}
 
-    LaunchedEffect(Unit) {
-        permissionState.launchPermissionRequest()
-    }
+//@OptIn(ExperimentalPermissionsApi::class)
+//@Composable
+//fun RequestLocationPermission(onLocationReceived: (Location?) -> Unit) {
+//    val context = LocalContext.current
+//    val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
+//
+//    LaunchedEffect(Unit) {
+//        permissionState.launchPermissionRequest()
+//    }
+//
+//    when {
+//        permissionState.status.isGranted -> {
+//            GetCurrentLocation(context) { location ->
+//                onLocationReceived(location)
+//            }
+//        }
+//        else -> {
+//            onLocationReceived(null)
+//        }
+//    }
+//}
+//
+//@Composable
+//fun GetCurrentLocation(context: Context, onLocationReceived: (Location?) -> Unit) {
+//    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+//
+//    LaunchedEffect(Unit) {
+//        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+//            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+//                .addOnSuccessListener { location: Location? ->
+//                    onLocationReceived(location)
+//                }
+//        } else {
+//            onLocationReceived(null)
+//        }
+//    }
+//}
 
-    when {
-        permissionState.status.isGranted -> {
-            //Text(text = "Permissão concedida. Buscando localização...")
-            GetCurrentLocation(context) { location ->
-                location?.let {
-                    locationText = "Latitude: ${it.latitude}, Longitude: ${it.longitude}"
-                }
-            }
-        }
-        permissionState.status.shouldShowRationale -> {
-            Text(text = "Precisamos da permissão para mostrar sua localização.")
-        }
-        else -> {
-            Text(text = "Permissão negada permanentemente.")
-        }
-    }
-
-    //Text(text = "Localização: $locationText")
-}
-
-@Composable
-fun GetCurrentLocation(context: Context, onLocationReceived: (Location?) -> Unit) {
-    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-
-    LaunchedEffect(Unit) {
-        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-                .addOnSuccessListener { location: Location? ->
-                    onLocationReceived(location)
-                }
-        }
-    }
-}
 
 suspend fun getAllCourts(): List<Court> {
     return withContext(Dispatchers.IO) {
