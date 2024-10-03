@@ -42,7 +42,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.iquadras.R
 import com.example.iquadras.model.adress.Adress
+<<<<<<< HEAD
+import com.example.iquadras.model.restClient.RetrofitClient
+=======
 import com.example.iquadras.restClient.RetrofitClient
+>>>>>>> main
 import com.example.iquadras.model.user.DTOUser
 import com.example.iquadras.model.user.User
 import kotlinx.coroutines.Dispatchers
