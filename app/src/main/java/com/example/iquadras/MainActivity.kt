@@ -15,16 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-<<<<<<< HEAD
 import androidx.compose.runtime.*
-=======
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
->>>>>>> main
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityCompat
@@ -32,11 +23,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.iquadras.model.court.Court
-<<<<<<< HEAD
 import com.example.iquadras.model.location.UserLocation
 import com.example.iquadras.model.location.UserLocationDatabase
-=======
->>>>>>> main
 import com.example.iquadras.model.user.DTOUser
 import com.example.iquadras.model.user.User
 import com.example.iquadras.ui.component.CourtView
@@ -50,11 +38,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.firebase.FirebaseApp
-<<<<<<< HEAD
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-=======
->>>>>>> main
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -62,16 +47,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         enableEdgeToEdge()
-<<<<<<< HEAD
         val locationDatabase = UserLocationDatabase.getInstance(this) // Inicializando o banco de dados Room
 
-=======
->>>>>>> main
         setContent {
             IquadrasTheme {
                 val navController = rememberNavController()
                 var currentLocation by remember { mutableStateOf<Location?>(null) }
-<<<<<<< HEAD
                 val context = LocalContext.current
 
                 // Obtendo a permissão e localização
@@ -82,12 +63,6 @@ class MainActivity : ComponentActivity() {
                     currentLocation?.let {
                         saveLocationInDatabase(locationDatabase, it)
                     }
-=======
-
-                // Obtendo a permissão e localização
-                requestLocationPermission()?.let {
-                    currentLocation = it
->>>>>>> main
                 }
 
                 Scaffold(
@@ -155,26 +130,16 @@ class MainActivity : ComponentActivity() {
                             val user = Gson().fromJson(userJson2, User::class.java)
                             println(user.id)
                             BookingsScreen(
-<<<<<<< HEAD
                                 user = user // Função que busca as reservas do usuário
                             )
                         }
                     }
-=======
-                                user = user,// Função que busca as reservas do usuário
-                            )
-                        }
-
-                    }
-
->>>>>>> main
                 }
             }
         }
     }
 }
 
-<<<<<<< HEAD
 // Função para salvar a localização no banco de dados Room
 fun saveLocationInDatabase(database: UserLocationDatabase, location: Location) {
     val userLocation = UserLocation(
@@ -193,14 +158,6 @@ fun saveLocationInDatabase(database: UserLocationDatabase, location: Location) {
 fun requestLocationPermission(onLocationReceived: (Location?) -> Unit) {
     val context = LocalContext.current
     val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-=======
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun requestLocationPermission(): Location? {
-    val context = LocalContext.current
-    val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-    var loc by remember { mutableStateOf<Location?>(null) }
->>>>>>> main
 
     LaunchedEffect(Unit) {
         permissionState.launchPermissionRequest()
@@ -209,7 +166,6 @@ fun requestLocationPermission(): Location? {
     when {
         permissionState.status.isGranted -> {
             GetCurrentLocation(context) { location ->
-<<<<<<< HEAD
                 onLocationReceived(location)
             }
         }
@@ -217,15 +173,6 @@ fun requestLocationPermission(): Location? {
             onLocationReceived(null) // Retorna null se a permissão não for concedida
         }
     }
-=======
-                location?.let {
-                    loc = location
-                }
-            }
-        }
-    }
-    return loc
->>>>>>> main
 }
 
 @Composable
@@ -243,7 +190,3 @@ fun GetCurrentLocation(context: Context, onLocationReceived: (Location?) -> Unit
         }
     }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> main
