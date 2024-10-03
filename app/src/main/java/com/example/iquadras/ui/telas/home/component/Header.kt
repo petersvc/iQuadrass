@@ -15,11 +15,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,7 +59,7 @@ fun Header(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -134,34 +139,91 @@ fun Header(
                 }
 
                 // Menu dropdown que aparece ao clicar na imagem
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false },
-                    modifier = Modifier
-                        .width(150.dp)
-                ) {
-                    DropdownMenuItem(onClick = {
-                        // Ação ao clicar em "Reservas"
-                        onReservationsClick()
-                        showMenu = false
-                    }) {
-                        Text("Reservas")
-                    }
-                    DropdownMenuItem(onClick = {
-                        // Ação ao clicar em "Perfil"
-                        showMenu = false
-                        showDialog = true // Abre o modal de perfil
-                    }) {
-                        Text("Perfil")
-                    }
-                    DropdownMenuItem(onClick = {
-                        // Ação ao clicar em "Sair"
-                        showMenu = false
-                        onLogoffClick() // Chama a função de logoff
-                    }) {
-                        Text("Sair")
+                MaterialTheme(
+                    // Define a cor de fundo do menu como vermelho
+                    colorScheme = MaterialTheme.colorScheme.copy(background = Color(0xFFFAF8FF)),
+                    shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(20))
+                ){
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        modifier = Modifier
+                            .width(240.dp)
+                            .background(Color.White) // color = Color(0xFFFAF8FF))
+
+                    ) {
+                        DropdownMenuItem(onClick = {
+                            // Ação ao clicar em "Perfil"
+                            showMenu = false
+                            showDialog = true // Abre o modal de perfil
+                        }) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = "Search Icon",
+                                    tint = Color.Black.copy(alpha = 0.25f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = "Meu perfil",
+                                    style = TextStyle(
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
+                                        fontSize = 16.sp,
+                                        color = Color.Black.copy(alpha = 0.7f)
+                                    ),
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
+                        DropdownMenuItem(onClick = {
+                            // Ação ao clicar em "Reservas"
+                            onReservationsClick()
+                            showMenu = false
+                        }) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.CalendarMonth,
+                                    contentDescription = "Search Icon",
+                                    tint = Color.Black.copy(alpha = 0.25f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = "Minhas reservas",
+                                    style = TextStyle(
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
+                                        fontSize = 16.sp,
+                                        color = Color.Black.copy(alpha = 0.7f)
+                                    ),
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
+                        DropdownMenuItem(onClick = {
+                            // Ação ao clicar em "Sair"
+                            showMenu = false
+                            onLogoffClick() // Chama a função de logoff
+                        }) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Logout,
+                                    contentDescription = "Search Icon",
+                                    tint = Color.Black.copy(alpha = 0.25f),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Text(
+                                    text = "Sair",
+                                    style = TextStyle(
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Normal,
+                                        fontSize = 16.sp,
+                                        color = Color.Black.copy(alpha = 0.7f)
+                                    ),
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
+                        }
                     }
                 }
+
             }
         }
     }

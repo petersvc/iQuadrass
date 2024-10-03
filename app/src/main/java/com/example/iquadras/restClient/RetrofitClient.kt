@@ -1,5 +1,8 @@
-package com.example.iquadras.model.restClient
+package com.example.iquadras.restClient
 
+import com.example.iquadras.service.BookingServiceIF
+import com.example.iquadras.service.CourtServiceIF
+import com.example.iquadras.service.UserServiceIF
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

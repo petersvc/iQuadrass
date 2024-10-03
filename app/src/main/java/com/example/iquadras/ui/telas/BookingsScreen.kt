@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.iquadras.model.booking.Booking
-import com.example.iquadras.model.restClient.RetrofitClient
+import com.example.iquadras.restClient.RetrofitClient
 import com.example.iquadras.model.user.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -1,6 +1,7 @@
 package com.example.iquadras.ui.telas.home
 
 import android.location.Location
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
@@ -32,10 +36,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.iquadras.model.court.Court
-import com.example.iquadras.model.restClient.RetrofitClient
+import com.example.iquadras.restClient.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import com.example.iquadras.model.user.User
@@ -57,12 +63,15 @@ fun HomeActivity(
 ) {
     val scope = rememberCoroutineScope()
     val courts = remember { mutableStateListOf<Court>() }
+    var filteredCourts by remember { mutableStateOf(listOf<Court>()) }
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(Unit) {
         scope.launch(Dispatchers.IO) {
             val courtsFetched = getAllCourts()
             courts.clear()
             courts.addAll(courtsFetched)
+            filteredCourts = courtsFetched
 //            courtDAO.getAll(callback = { courtsFetched ->
 //                courts.clear()
 //                courts.addAll(courtsFetched)
@@ -77,13 +86,9 @@ fun HomeActivity(
 
         Header(onLogoffClick = onLogoffClick, modifier = Modifier, user = user, onReservationsClick = onReservationsClick)
 
-        SubHeader()
-
-        // Spacer(modifier = Modifier.height(16.dp))
-
-        // RequestLocationPermission()
-
         Spacer(modifier = Modifier.height(8.dp))
+
+        SubHeader()
 
         var searchQuery by remember { mutableStateOf("") }
 
@@ -91,17 +96,23 @@ fun HomeActivity(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(110.dp)
-                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp),
+                .padding(start = 16.dp, top = 16.dp, bottom = 16.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { searchQuery = it },
+                onValueChange = { query ->
+                    searchQuery = query
+                    // Atualiza as quadras filtradas com base na pesquisa
+                    filteredCourts = courts.filter { court ->
+                        court.name.contains(query, ignoreCase = true)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(3f)
-                    .height(44.dp),
+                    .weight(4f)
+                    .height(64.dp),
                 label = {
                     Text(
                         text = "Buscar quadras",
@@ -115,7 +126,10 @@ fun HomeActivity(
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search Icon",
-                        tint = Color.Black.copy(alpha = 0.4f)
+                        tint = Color.Black.copy(alpha = 0.4f),
+                        modifier = Modifier
+                            .padding(start = 16.dp, end = 8.dp)
+                            .size(28.dp)
                     )
                 },
                 shape = RoundedCornerShape(32.dp),
@@ -123,16 +137,33 @@ fun HomeActivity(
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = themeColor.copy(alpha = 0.8f),
                     unfocusedBorderColor = Color.Black.copy(alpha = 0.1f),
-                )
+                ),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        focusManager.clearFocus() // Remove o foco ao pressionar "Done"
+                    }
+                ),
             )
+            Spacer(modifier = Modifier.width(16.dp))
             IconButton(
                 onClick = { /* Ação do ícone de filtros */ },
-                modifier = Modifier.size(56.dp).weight(1f).fillMaxHeight()
+                modifier = Modifier
+                    .size(56.dp)
+                    .fillMaxHeight()
+                    .border(
+                        width = 1.dp,
+                        color = Color.Black.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(64.dp)
+                )
             ) {
                 Icon(
                     imageVector = Icons.Default.FilterList,
                     contentDescription = "Filtros Icon",
-                    tint = Color.Black.copy(alpha = 0.4f)
+                    tint = Color.Black.copy(alpha = 0.4f),
+                    modifier = Modifier.size(28.dp)
 
                 )
             }
@@ -142,83 +173,11 @@ fun HomeActivity(
             .fillMaxHeight()
             .weight(1f)
         ) {
-            CourtsListColumn(courts, onCourtClick, currentLocation)
+            CourtsListColumn(courts = filteredCourts, onCourtClick, currentLocation)
         }
-
-
 
     }
 }
-
-//@OptIn(ExperimentalPermissionsApi::class)
-//@Composable
-//fun RequestLocationPermission() {
-//    val context = LocalContext.current
-//    val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-//    var locationText by remember { mutableStateOf("Aguardando localização...") }
-//
-//    LaunchedEffect(Unit) {
-//        permissionState.launchPermissionRequest()
-//    }
-//
-//    when {
-//        permissionState.status.isGranted -> {
-//            //Text(text = "Permissão concedida. Buscando localização...")
-//            GetCurrentLocation(context) { location ->
-//                location?.let {
-//                    locationText = "Latitude: ${it.latitude}, Longitude: ${it.longitude}"
-//                }
-//            }
-//        }
-//        permissionState.status.shouldShowRationale -> {
-//            Text(text = "Precisamos da permissão para mostrar sua localização.")
-//        }
-//        else -> {
-//            Text(text = "Permissão negada permanentemente.")
-//        }
-//    }
-//
-//    Text(text = "Localização: $locationText")
-//}
-
-//@OptIn(ExperimentalPermissionsApi::class)
-//@Composable
-//fun RequestLocationPermission(onLocationReceived: (Location?) -> Unit) {
-//    val context = LocalContext.current
-//    val permissionState = rememberPermissionState(android.Manifest.permission.ACCESS_FINE_LOCATION)
-//
-//    LaunchedEffect(Unit) {
-//        permissionState.launchPermissionRequest()
-//    }
-//
-//    when {
-//        permissionState.status.isGranted -> {
-//            GetCurrentLocation(context) { location ->
-//                onLocationReceived(location)
-//            }
-//        }
-//        else -> {
-//            onLocationReceived(null)
-//        }
-//    }
-//}
-//
-//@Composable
-//fun GetCurrentLocation(context: Context, onLocationReceived: (Location?) -> Unit) {
-//    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-//
-//    LaunchedEffect(Unit) {
-//        if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-//            fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
-//                .addOnSuccessListener { location: Location? ->
-//                    onLocationReceived(location)
-//                }
-//        } else {
-//            onLocationReceived(null)
-//        }
-//    }
-//}
-
 
 suspend fun getAllCourts(): List<Court> {
     return withContext(Dispatchers.IO) {

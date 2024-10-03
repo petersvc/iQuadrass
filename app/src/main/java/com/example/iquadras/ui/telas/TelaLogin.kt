@@ -52,7 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.iquadras.R
 import com.example.iquadras.model.court.CourtDAO
-import com.example.iquadras.model.restClient.RetrofitClient
+import com.example.iquadras.restClient.RetrofitClient
 import com.example.iquadras.model.user.DTOUser
 import com.example.iquadras.model.user.DTOUserLogin
 import com.example.iquadras.model.user.User

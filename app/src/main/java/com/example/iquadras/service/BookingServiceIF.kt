@@ -1,4 +1,4 @@
-package com.example.iquadras.model.restClient
+package com.example.iquadras.service
 
 import com.example.iquadras.model.booking.Booking
 import com.example.iquadras.model.booking.DTOBooking

@@ -5,11 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CalendarMonth
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,7 +36,7 @@ fun SubHeader(modifier: Modifier = Modifier) {
                         withStyle(
                             style = SpanStyle(
                                 fontWeight = FontWeight.Light,
-                                fontSize = 32.sp,
+                                fontSize = 24.sp,
                                 color = Color.Black.copy(alpha = 0.6f)
                             )
                         ) {
@@ -49,17 +45,16 @@ fun SubHeader(modifier: Modifier = Modifier) {
                         withStyle(
                             style = SpanStyle(
                                 fontWeight = FontWeight.Bold,
-                                fontSize = 32.sp,
+                                fontSize = 24.sp,
                                 color = themeColor.copy(alpha = 0.99f)
                             )
                         ) {
-                            append("Quadra.")
+                            append("quadra.")
                         }
                     },
                     style = MaterialTheme.typography.displaySmall,
                     modifier = Modifier
-                        .padding(start = 0.dp)
-                        .width(220.dp)
+                        .width(320.dp)
                 )
             }
         }
