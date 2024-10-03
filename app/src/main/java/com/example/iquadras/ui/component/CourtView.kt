@@ -49,7 +49,11 @@ import com.example.iquadras.R
 import com.example.iquadras.model.booking.Booking
 import com.example.iquadras.model.booking.DTOBooking
 import com.example.iquadras.model.court.Court
+<<<<<<< HEAD
 import com.example.iquadras.model.restClient.RetrofitClient
+=======
+import com.example.iquadras.restClient.RetrofitClient
+>>>>>>> main
 import com.example.iquadras.model.user.User
 import com.example.iquadras.ui.telas.themeColor
 import kotlinx.coroutines.Dispatchers
