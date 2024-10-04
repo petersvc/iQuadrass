@@ -37,7 +37,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.iquadras.model.booking.Booking
+<<<<<<< HEAD
+import com.example.iquadras.model.restClient.RetrofitClient
+=======
 import com.example.iquadras.restClient.RetrofitClient
+>>>>>>> main
 import com.example.iquadras.model.user.User
 import com.example.iquadras.ui.telas.home.component.Header
 import com.example.iquadras.ui.telas.home.component.SubHeader
