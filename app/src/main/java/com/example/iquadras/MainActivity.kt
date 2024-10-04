@@ -41,6 +41,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.firebase.FirebaseApp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
@@ -48,14 +50,22 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
         enableEdgeToEdge()
+        //val locationDatabase = UserLocationDatabase.getInstance(this) // Inicializando o banco de dados Room
+
         setContent {
             IquadrasTheme {
                 val navController = rememberNavController()
                 var currentLocation by remember { mutableStateOf<Location?>(null) }
+                val context = LocalContext.current
 
                 // Obtendo a permissão e localização
                 requestLocationPermission()?.let {
                     currentLocation = it
+
+		    /// Salvando a localização no banco de dados quando for obtida
+                    currentLocation?.let {
+                        //saveLocationInDatabase(locationDatabase, it)
+                    }
                 }
 
                 Scaffold(
@@ -124,6 +134,13 @@ class MainActivity : ComponentActivity() {
                             println(user.id)
                             BookingsScreen(
                                 user = user,// Função que busca as reservas do usuário
+                                onReservationsClick = {
+                                    val userJson2 = Uri.encode(Gson().toJson(user))
+                                    navController.navigate("reservations/$userJson2")
+                                },
+                                onLogoffClick = {
+                                    navController.navigate("login")
+                                },
                             )
                         }
 
@@ -134,6 +151,19 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+// Função para salvar a localização no banco de dados Room
+//fun saveLocationInDatabase(database: UserLocationDatabase, location: Location) {
+//    val userLocation = UserLocation(
+//        latitude = location.latitude,
+//        longitude = location.longitude,
+//        timestamp = System.currentTimeMillis()
+//    )
+//    // Lançando uma coroutine para salvar no banco de dados
+//    kotlinx.coroutines.GlobalScope.launch(Dispatchers.IO) {
+//        database.userLocationDao().insertLocation(userLocation)
+//    }
+//}
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable

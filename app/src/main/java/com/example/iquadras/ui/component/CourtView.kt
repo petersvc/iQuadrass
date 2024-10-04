@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.widget.NumberPicker
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -75,6 +76,8 @@ fun CourtView(court: Court, user: User, currentLocation: Location?) {
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var selectedTime by remember { mutableStateOf("") }
+    var mensagemErro by remember { mutableStateOf<String?>(null) }
+    var mensagemSucesso by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
 
@@ -447,11 +450,13 @@ fun CourtView(court: Court, user: User, currentLocation: Location?) {
                                 withContext(Dispatchers.Main) {
                                     // Atualizar UI ou exibir mensagem de sucesso
                                     Log.d("Booking", "Booking created: $createdBooking")
+                                    mensagemSucesso = "Reserva criada com sucesso!"
                                 }
                             } catch (e: Exception) {
                                 withContext(Dispatchers.Main) {
                                     // Lidar com o erro na UI (ex: mostrar um Toast)
                                     Log.e("Booking", "Error creating booking: ${e.message}")
+                                    mensagemErro = e.message
                                 }
                             }
                         }
@@ -467,6 +472,20 @@ fun CourtView(court: Court, user: User, currentLocation: Location?) {
                     shape = RoundedCornerShape(32.dp)
                 ) {
                     Text(text = "Reservar", style = MaterialTheme.typography.bodyLarge)
+                }
+
+                mensagemErro?.let {
+                    LaunchedEffect(it) {
+                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        mensagemErro = null
+                    }
+                }
+
+                mensagemSucesso?.let {
+                    LaunchedEffect(it) {
+                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        mensagemSucesso = null
+                    }
                 }
 
                 if (showDatePicker) {

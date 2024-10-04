@@ -48,6 +48,7 @@ import com.example.iquadras.model.user.User
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Response
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +61,7 @@ fun TelaCadastro(modifier: Modifier = Modifier, onSignUpClick: () -> Unit, onSig
     var login by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var mensagemErro by remember { mutableStateOf<String?>(null) }
+    var mensagemSucesso by remember { mutableStateOf<String?>(null) }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -189,7 +191,7 @@ fun TelaCadastro(modifier: Modifier = Modifier, onSignUpClick: () -> Unit, onSig
 
         Text(
             text = "Digite uma senha válida",
-            color = Color(0xFF00704A).copy(alpha = 0.7f),
+            color = themeColor.copy(alpha = 0.7f),
             textAlign = androidx.compose.ui.text.style.TextAlign.End,
             modifier = Modifier
                 .fillMaxWidth(),
@@ -204,32 +206,23 @@ fun TelaCadastro(modifier: Modifier = Modifier, onSignUpClick: () -> Unit, onSig
             onClick = {
                 scope.launch(Dispatchers.IO) {
                     val userToSave = User(name= name, phone = phone, email = login, password = password)
-                    val user = createUser(userToSave)
+                    val user = createUser(userToSave).body()!!
                     if (user.id.isEmpty()) {
                         mensagemErro = "Não foi possível cadastrar o usuário!"
                         return@launch
                     } else {
                         withContext(Dispatchers.Main) {
+                            mensagemSucesso = "Usuário cadastrado com sucesso!"
                             onSignUpClick()
                         }
                     }
-//                    userDAO.findByEmail(login, callback = { user ->
-//                        if (user != null) {
-//                            mensagemErro = "Usuário já cadastrado!"
-//                        } else {
-//                            val userToSave = User(name= name, phone = phone, email = login, password = password)
-//                            userDAO.save(userToSave, callback = {
-//                                onSignUpClick()
-//                            })
-//                        }
-//                    })
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(52.dp),
             shape = RoundedCornerShape(16.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00704A))
+            colors = ButtonDefaults.buttonColors(containerColor = themeColor)
         ) {
             Text("Cadastrar", color = Color.White)
         }
@@ -240,6 +233,13 @@ fun TelaCadastro(modifier: Modifier = Modifier, onSignUpClick: () -> Unit, onSig
             LaunchedEffect(it) {
                 Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                 mensagemErro = null
+            }
+        }
+
+        mensagemSucesso?.let {
+            LaunchedEffect(it) {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                mensagemSucesso = null
             }
         }
 
@@ -258,7 +258,7 @@ fun TelaCadastro(modifier: Modifier = Modifier, onSignUpClick: () -> Unit, onSig
             )
             Text(
                 text = "Sign in",
-                color = Color(0xFF00704A),
+                color = themeColor,
                 style = TextStyle(fontWeight = FontWeight.Bold),
                 modifier = Modifier
                     .clickable { onSignInClick() }
@@ -268,7 +268,7 @@ fun TelaCadastro(modifier: Modifier = Modifier, onSignUpClick: () -> Unit, onSig
     }
 }
 
-suspend fun createUser(user: User): DTOUser {
+suspend fun createUser(user: User): Response<DTOUser> {
     return withContext(Dispatchers.IO) {
         RetrofitClient.userService.createUser(user)
     }

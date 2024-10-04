@@ -21,9 +21,9 @@ import androidx.compose.ui.unit.sp
 import com.example.iquadras.ui.telas.themeColor
 
 @Composable
-fun SubHeader(modifier: Modifier = Modifier) {
+fun SubHeader(text: String, text2: String) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -40,7 +40,7 @@ fun SubHeader(modifier: Modifier = Modifier) {
                                 color = Color.Black.copy(alpha = 0.6f)
                             )
                         ) {
-                            append("Encontre a sua ")
+                            append(text)
                         }
                         withStyle(
                             style = SpanStyle(
@@ -49,7 +49,7 @@ fun SubHeader(modifier: Modifier = Modifier) {
                                 color = themeColor.copy(alpha = 0.99f)
                             )
                         ) {
-                            append("quadra.")
+                            append(text2)
                         }
                     },
                     style = MaterialTheme.typography.displaySmall,

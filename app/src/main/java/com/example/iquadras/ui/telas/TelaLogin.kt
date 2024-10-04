@@ -19,9 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.outlined.Email
-import androidx.compose.material.icons.sharp.Email
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,11 +53,11 @@ import com.example.iquadras.model.court.CourtDAO
 import com.example.iquadras.restClient.RetrofitClient
 import com.example.iquadras.model.user.DTOUser
 import com.example.iquadras.model.user.DTOUserLogin
-import com.example.iquadras.model.user.User
 import com.example.iquadras.model.user.UserDAO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.Response
 
 val userDAO: UserDAO = UserDAO()
 val courtDAO: CourtDAO = CourtDAO()
@@ -74,6 +72,7 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (DTOUser) -> Unit, o
     var login by remember { mutableStateOf("") } // email
     var password by remember { mutableStateOf("") }
     var mensagemErro by remember { mutableStateOf<String?>(null) }
+    var mensagemSucesso by remember { mutableStateOf<String?>(null) }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -101,10 +100,8 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (DTOUser) -> Unit, o
 
                 Box(
                     modifier = Modifier
-                        //.size(150.dp)
                         .clip(CircleShape)
                         .background(Color.Gray.copy(alpha = 0.0f)),
-                        //.padding(top = 14.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
@@ -216,24 +213,10 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (DTOUser) -> Unit, o
                             } else {
                                 // Navegação deve ocorrer na main thread
                                 withContext(Dispatchers.Main) {
+                                    mensagemSucesso = "Login realizado com sucesso!"
                                     onSignInClick(dtoUser)
                                 }
                             }
-
-//                    userDAO.findByEmail(login, callback = { user ->
-//                        if (user != null && user.password == password) {
-//                            onSignInClick(user)
-//                        } else {
-//                            mensagemErro = "Login ou senha inválidos!"
-//                        }
-//                    })
-//                            userDAO.findByEmail(loginn, callback = { user ->
-//                                if (user != null && user.password == passwordd) {
-//                                    onSignInClick(user)
-//                                } else {
-//                                    mensagemErro = "Login ou senha inválidos!"
-//                                }
-//                            })
                         }
                     },
                     modifier = Modifier
@@ -251,6 +234,13 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (DTOUser) -> Unit, o
                     LaunchedEffect(it) {
                         Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
                         mensagemErro = null
+                    }
+                }
+
+                mensagemSucesso?.let {
+                    LaunchedEffect(it) {
+                        Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                        mensagemSucesso = null
                     }
                 }
 
@@ -359,6 +349,11 @@ fun GoogleLoginButton(
 
 suspend fun login(dtoUserLogin: DTOUserLogin): DTOUser {
     return withContext(Dispatchers.IO) {
-        RetrofitClient.userService.login(dtoUserLogin)
+        val response = RetrofitClient.userService.login(dtoUserLogin)
+        if (response.isSuccessful) {
+            response.body()!!
+        } else {
+            throw Exception("Falha ao fazer login: ${response.errorBody()?.string()}")
+        }
     }
 }

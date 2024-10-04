@@ -2,6 +2,7 @@ package com.example.iquadras.service
 
 import com.example.iquadras.model.booking.Booking
 import com.example.iquadras.model.booking.DTOBooking
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -21,6 +22,6 @@ interface BookingServiceIF {
     suspend fun createBooking(@Body booking: DTOBooking): Booking
 
     @DELETE("booking/{id}")
-    suspend fun deleteBooking(@Path("id") id: Long): String
+    suspend fun deleteBooking(@Path("id") id: Long): Response<Void>
 
 }

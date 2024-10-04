@@ -81,14 +81,14 @@ fun HomeActivity(
 
     Column(
         modifier = modifier
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp)
     ) {
 
         Header(onLogoffClick = onLogoffClick, modifier = Modifier, user = user, onReservationsClick = onReservationsClick)
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        SubHeader()
+        SubHeader("Encontre a sua ", "quadra.")
 
         var searchQuery by remember { mutableStateOf("") }
 

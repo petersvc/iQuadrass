@@ -1,5 +1,6 @@
 package com.example.iquadras.ui.telas.home.component
 
+import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,6 +58,7 @@ fun Header(
     var showMenu by remember { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) } // Controla se o modal de perfil deve ser exibido
 
+    Spacer(modifier = Modifier.height(16.dp))
     Row(
         modifier = modifier
             .fillMaxWidth()
