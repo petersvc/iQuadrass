@@ -203,9 +203,9 @@ fun TelaLogin(modifier: Modifier = Modifier, onSignInClick: (DTOUser) -> Unit, o
                 Button(
                     onClick = {
                         scope.launch(Dispatchers.IO) {
-                            val loginn = "joana@mail.com"
-                            val passwordd = "12345"
-                            val dtoUserLogin = DTOUserLogin(loginn, passwordd)
+                            // val loginn = "joana@mail.com"
+                            // val passwordd = "12345"
+                            val dtoUserLogin = DTOUserLogin(login, password)
                             val dtoUser = login(dtoUserLogin)
 
                             if (dtoUser.id.isEmpty()) {

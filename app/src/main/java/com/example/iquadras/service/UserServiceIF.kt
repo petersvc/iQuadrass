@@ -14,7 +14,7 @@ import retrofit2.http.Path
 interface UserServiceIF {
 
     @GET("user/{id}")
-    suspend fun getUser(@Path("id") id: Long): DTOUser
+    suspend fun getUser(@Path("id") id: Long): Response<User>
 
     @GET("user")
     suspend fun getAllUsers(): List<User>
@@ -26,8 +26,8 @@ interface UserServiceIF {
     suspend fun createUser(@Body user: User): Response<DTOUser>
 
     @PUT("user/{id}")
-    suspend fun updateUser(@Path("id") id: Long, @Body user: User): DTOUser
+    suspend fun updateUser(@Path("id") id: Long, @Body user: User): Response<DTOUser>
 
     @DELETE("user/{id}")
-    suspend fun deleteUser(@Path("id") id: Long): String
+    suspend fun deleteUser(@Path("id") id: Long): Response<Void>
 }

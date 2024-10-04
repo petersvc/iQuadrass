@@ -607,7 +607,7 @@ fun DurationPickerDialog(
                 NumberPicker(
                     value = currentDuration.intValue,
                     onValueChange = { currentDuration.intValue = it },
-                    range = 1..15, // Limita a duração de 1 a 24 horas
+                    range = 1..15, // Limita a duração de 1 a 15 horas
                     modifier = Modifier.fillMaxWidth(),
                     context = LocalContext.current
                 )

@@ -1,5 +1,6 @@
 package com.example.iquadras.ui.telas.home.component
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,11 +25,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.example.iquadras.model.user.DTOUser
 import com.example.iquadras.model.user.User
-import com.example.iquadras.model.user.UserDAO
+import com.example.iquadras.restClient.RetrofitClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun UserProfileDialog(
@@ -37,19 +41,20 @@ fun UserProfileDialog(
     onDeleteClick: () -> Unit,
     onLogoffClick: () -> Unit
 ) {
-    val userDao = UserDAO()
-    var user by remember { mutableStateOf<User?>(null) }
+    var user by remember { mutableStateOf(userDTO) }
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var showEditDialog by remember { mutableStateOf(false) }
     var showConfirmDeleteDialog by remember { mutableStateOf(false) } // Controla a exibição do diálogo de confirmação
+    var mensagemErro by remember { mutableStateOf<String?>(null) }
+    var mensagemSucesso by remember { mutableStateOf<String?>(null) }
 
-    // Sempre que o dialog for exibido, buscamos o usuário do banco
-//    LaunchedEffect(userDTO.id) {
-//        userDao.findById(userDTO.id) { fetchedUser ->
-//            user = fetchedUser
-//        }
-//    }
-    user = userDTO
+    //Sempre que o dialog for exibido, buscamos o usuário do banco
+    LaunchedEffect(userDTO.id) {
+        user = getUser(userDTO.id.toLong())
+    }
+
+    // user = userDTO
 
     // Exibe um texto de carregamento enquanto os dados não foram carregados
 //    if (user == null) {
@@ -117,19 +122,21 @@ fun UserProfileDialog(
     // Exibe o diálogo de edição de perfil
     if (showEditDialog) {
         UserEditProfileDialog(
-            user = user!!,
+            user = user,  // Passa o estado atual do usuário
             onDismiss = {
-                showEditDialog = false // Fecha o UserEditDialog
-                onDismiss() // Fecha tudo ao cancelar a edição
+                showEditDialog = false // Fecha o diálogo de edição
             },
             onSaveClick = { updatedUser ->
-                // Atualiza os dados do usuário no banco e reabre o UserProfileDialog
+                // Atualiza o estado do usuário com os dados alterados
                 scope.launch(Dispatchers.IO) {
-                    userDao.update(updatedUser) { success ->
-                        if (success) {
-                            user = updatedUser // Atualiza o estado do usuário localmente
-                            showEditDialog = false // Fecha o diálogo de edição
+                    try {
+                        updateUser(updatedUser)  // Faz a atualização no backend
+                        withContext(Dispatchers.Main) {
+                            user = updatedUser  // Atualiza o estado do usuário localmente
+                            showEditDialog = false  // Fecha o diálogo de edição
                         }
+                    } catch (e: Exception) {
+                        mensagemErro = e.message
                     }
                 }
             }
@@ -150,12 +157,18 @@ fun UserProfileDialog(
                 Button(
                     onClick = {
                         scope.launch(Dispatchers.IO) {
-                            userDao.delete(user!!) { success ->
-                                if (success) {
-                                    onDeleteClick()
-                                    onLogoffClick()
-                                }
+                            user?.id?.let { deleteUser(it.toLong()) }
+                            withContext(Dispatchers.Main) {
+                                mensagemSucesso = "Usuário deletado com sucesso"
+                                onDeleteClick()
+                                onLogoffClick()
                             }
+//                            userDao.delete(user!!) { success ->
+//                                if (success) {
+//                                    onDeleteClick()
+//                                    onLogoffClick()
+//                                }
+//                            }
                         }
                     },
                     colors = ButtonDefaults.buttonColors(),
@@ -170,7 +183,51 @@ fun UserProfileDialog(
                 }
             }
         )
+        mensagemErro?.let {
+            LaunchedEffect(it) {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                mensagemErro = null
+            }
+        }
+
+        mensagemSucesso?.let {
+            LaunchedEffect(it) {
+                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                mensagemSucesso = null
+            }
+        }
     }
 }
 
+suspend fun getUser(userId: Long): User {
+    return withContext(Dispatchers.IO) {
+        val response = RetrofitClient.userService.getUser(userId)
+        if (response.isSuccessful) {
+            response.body() ?: throw Exception("Usuário não encontrado")
+        } else {
+            throw Exception("Falha ao buscar usuário: ${response.errorBody()?.string()}")
+        }
+    }
+}
 
+suspend fun updateUser(user: User): Any {
+    return withContext(Dispatchers.IO) {
+        val response = RetrofitClient.userService.updateUser(user.id.toLong(), user)
+        if (response.isSuccessful) {
+            response.body() ?: "Usuário atualizado com sucesso" // Lida com resposta nula ou string vazia
+        } else {
+            throw Exception("Falha ao atualizar usuário: ${response.errorBody()?.string()}")
+        }
+    }
+}
+
+suspend fun deleteUser(userId: Long): Any {
+    return withContext(Dispatchers.IO) {
+        val response = RetrofitClient.userService.deleteUser(userId)
+        if (response.isSuccessful) {
+            response.body() ?: "Usuário deletado com sucesso" // Lida com resposta nula ou string vazia
+        } else {
+            throw Exception("Falha ao deletar usuário: ${response.errorBody()?.string()}")
+        }
+    }
+}

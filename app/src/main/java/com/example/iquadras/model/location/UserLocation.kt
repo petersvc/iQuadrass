@@ -1,8 +1,8 @@
-package com.example.iquadras.model.location
-
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-
+//package com.example.iquadras.model.location
+//
+//import androidx.room.Entity
+//import androidx.room.PrimaryKey
+//
 //@Entity(tableName = "user_location")
 //data class UserLocation(
 //    @PrimaryKey(autoGenerate = true)
@@ -11,4 +11,3 @@ import androidx.room.PrimaryKey
 //    val longitude: Double,
 //    val timestamp: Long
 //)
-

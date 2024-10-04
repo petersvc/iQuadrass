@@ -4,11 +4,14 @@
 //import androidx.room.Database
 //import androidx.room.Room
 //import androidx.room.RoomDatabase
+//import com.example.iquadras.model.booking.BookingHistory
+//import com.example.iquadras.model.booking.BookingHistoryDAO
 //
-//@Database(entities = [UserLocation::class], version = 1, exportSchema = false)
+//@Database(entities = [UserLocation::class, BookingHistory::class], version = 1, exportSchema = false)
 //abstract class UserLocationDatabase : RoomDatabase() {
 //
 //    abstract fun userLocationDao(): UserLocationDAO
+//    abstract fun bookingHistoryDao(): BookingHistoryDAO
 //
 //    companion object {
 //        @Volatile
